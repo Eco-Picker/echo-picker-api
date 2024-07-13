@@ -21,12 +21,20 @@ repositories {
 	mavenCentral()
 }
 
+configurations {
+	all {
+		exclude(group = "org.apache.logging.log4j", module = "log4j-to-slf4j")
+		exclude(group = "commons-logging", module = "commons-logging")
+	}
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-mustache")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("io.github.oshai:kotlin-logging:6.0.3")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

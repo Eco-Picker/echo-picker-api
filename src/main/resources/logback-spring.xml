@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="1 seconds">
+    <!-- console -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] [%thread] %msg \(%logger:%+3line\)%n" />
+
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="console">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- default logger level, appender -->
+    <root level="debug">
+        <appender-ref ref="console"/>
+    </root>
+
+</configuration>

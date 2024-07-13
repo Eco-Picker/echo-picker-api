@@ -13,3 +13,8 @@ general:
 spring:
   application:
     name: eco-picker-api
+
+logging:
+  level:
+    root: INFO
+    com.eco_picker: DEBUG
