@@ -29,3 +29,12 @@ Contact
 For any questions or feedback, please contact
 - [jerry2219398\@gmail.com](mailto:jerry2219398@gmail.com?subject=ecopicker)
 - [jsunwoo0977\@gmail.com](mailto:jsunwoo0977@gmail.com?subject=ecopicker)
+
+### TODO 
+- [ ] set up swagger
+- [ ] convention
+- [ ] set up db 
+- [ ] set up logging
+- [ ] set up spring security 
+- [ ] images - s3, local, etc
+- [ ] locations - map 
