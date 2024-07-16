@@ -1,29 +1,43 @@
 package com.eco_picker.api.domain.user.controller
 
+import com.eco_picker.api.domain.user.data.dto.LoginRequest
+import com.eco_picker.api.domain.user.data.dto.LoginResponse
 import com.eco_picker.api.domain.user.service.AuthService
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/p/auth")
-class AuthController (private val authService: AuthService){
-    @PostMapping("signup")
-    fun signup () {
+class AuthController(private val authService: AuthService) {
+    @PostMapping("/p/auth/signup")
+    fun signup() {
         authService.signup()
     }
 
-    @PostMapping("login")
-    fun login () {
-        authService.login()
+    /**
+     * Request, Response Example
+     */
+    @PostMapping("/p/auth/login")
+    fun login(@RequestBody loginRequest: LoginRequest): LoginResponse {
+        var jwtToken = authService.login(loginRequest)
+        if (jwtToken.isNullOrEmpty()) {
+            return LoginResponse().apply {
+                code = LoginResponse.Code.LOGIN_FAILED
+                message = "This is dummy error message!"
+            }
+        }
+        return LoginResponse().apply {
+            result = true
+            jwtToken = jwtToken
+        }
     }
 
-    @PostMapping("logout")
+    @PostMapping("/auth/logout")
     fun logout() {
         authService.logout()
     }
 
-    @PostMapping("verify_mail")
+    @PostMapping("/p/auth/verify_mail")
     fun verifyMail() {
         authService.verifyMail()
     }
