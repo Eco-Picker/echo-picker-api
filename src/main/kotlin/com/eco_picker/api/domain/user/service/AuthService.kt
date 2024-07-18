@@ -27,4 +27,14 @@ class AuthService {
             result = true
         }
     }
+
+    fun sendTempPassword(): Boolean {
+        val tempPassword = this.generateTempPassword();
+        // @todo send mail
+        return true;
+    }
+
+    private fun generateTempPassword(): String {
+        return "temp password";
+    }
 }

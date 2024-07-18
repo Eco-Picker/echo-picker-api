@@ -47,7 +47,6 @@ For any questions or feedback, please contact
 - [ ] encrypt/decrypt properties
 - [ ] set up db
 - [ ] set up logging
-- [ ] set up spring security
 - [ ] images - s3, local, etc
 - [ ] locations - map
 - [ ] version check 

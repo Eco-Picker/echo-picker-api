@@ -4,7 +4,7 @@ import com.eco_picker.api.global.data.BaseResponse
 import io.swagger.v3.oas.annotations.media.Schema
 
 class VerifyMailResponse : BaseResponse<VerifyMailResponse.Code>() {
-    @field:Schema(description = "user email")
+    @field:Schema(description = "email")
     val email: String? = null
 
     enum class Code {

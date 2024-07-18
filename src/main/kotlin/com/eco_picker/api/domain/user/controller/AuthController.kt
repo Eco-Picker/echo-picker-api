@@ -42,7 +42,7 @@ class AuthController(private val authService: AuthService) {
 
     @Operation(
         tags = [OperationTag.AUTHENTICATION],
-        summary = "Verify mail",
+        summary = "Verify a mail",
     )
     @GetMapping("/p/auth/verify_mail/{token}")
     fun verifyMail(
@@ -50,5 +50,17 @@ class AuthController(private val authService: AuthService) {
         @PathVariable token: String
     ): VerifyMailResponse {
         return authService.verifyMail(token)
+    }
+
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
+        summary = "Send a temp password"
+    )
+    @PostMapping("/p/auth/send_temp_password")
+    fun sendTempPasswordMail(@RequestBody sendTempPasswordRequest: SendTempPasswordRequest): DefaultResponse {
+        val result = this.authService.sendTempPassword();
+        return DefaultResponse().apply {
+            this.result = result
+        }
     }
 }
