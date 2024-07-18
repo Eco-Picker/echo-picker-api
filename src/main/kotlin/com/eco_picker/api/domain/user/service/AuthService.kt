@@ -29,12 +29,12 @@ class AuthService {
     }
 
     fun sendTempPassword(): Boolean {
-        val tempPassword = this.generateTempPassword();
+        val tempPassword = this.generateTempPassword()
         // @todo send mail
-        return true;
+        return true
     }
 
     private fun generateTempPassword(): String {
-        return "temp password";
+        return "temp password"
     }
 }
