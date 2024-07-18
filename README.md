@@ -44,8 +44,10 @@ For any questions or feedback, please contact
 ### TODO
 
 - [ ] convention
+- [ ] encrypt/decrypt properties
 - [ ] set up db
 - [ ] set up logging
 - [ ] set up spring security
 - [ ] images - s3, local, etc
-- [ ] locations - map 
+- [ ] locations - map
+- [ ] version check 

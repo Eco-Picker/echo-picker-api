@@ -1,44 +1,54 @@
 package com.eco_picker.api.domain.user.controller
 
-import com.eco_picker.api.domain.user.data.dto.LoginRequest
-import com.eco_picker.api.domain.user.data.dto.LoginResponse
+import com.eco_picker.api.domain.user.data.dto.*
 import com.eco_picker.api.domain.user.service.AuthService
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import com.eco_picker.api.global.data.DefaultResponse
+import com.eco_picker.api.global.document.OperationTag
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class AuthController(private val authService: AuthService) {
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
+        summary = "Signup",
+    )
     @PostMapping("/p/auth/signup")
-    fun signup() {
-        authService.signup()
+    fun signup(@RequestBody signupRequest: SignupRequest): SignupResponse {
+        return authService.signup(signupRequest)
     }
 
-    /**
-     * Request, Response Example
-     */
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
+        summary = "Login",
+    )
     @PostMapping("/p/auth/login")
     fun login(@RequestBody loginRequest: LoginRequest): LoginResponse {
-        var jwtToken = authService.login(loginRequest)
-        if (jwtToken.isNullOrEmpty()) {
-            return LoginResponse().apply {
-                code = LoginResponse.Code.LOGIN_FAILED
-                message = "This is dummy error message!"
-            }
-        }
-        return LoginResponse().apply {
-            result = true
-            jwtToken = jwtToken
-        }
+        return authService.login(loginRequest)
     }
 
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
+        summary = "Logout",
+    )
     @PostMapping("/auth/logout")
-    fun logout() {
-        authService.logout()
+    fun logout(): DefaultResponse {
+        val result = authService.logout()
+        return DefaultResponse().apply {
+            this.result = result
+        }
     }
 
-    @PostMapping("/p/auth/verify_mail")
-    fun verifyMail() {
-        authService.verifyMail()
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
+        summary = "Verify mail",
+    )
+    @GetMapping("/p/auth/verify_mail/{token}")
+    fun verifyMail(
+        @Schema(description = "Encrypted token generated for sending signup verification email.")
+        @PathVariable token: String
+    ): VerifyMailResponse {
+        return authService.verifyMail(token)
     }
 }

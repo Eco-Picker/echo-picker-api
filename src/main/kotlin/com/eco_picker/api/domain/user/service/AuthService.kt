@@ -1,15 +1,30 @@
 package com.eco_picker.api.domain.user.service
 
-import com.eco_picker.api.domain.user.data.dto.LoginRequest
+import com.eco_picker.api.domain.user.data.dto.*
 import org.springframework.stereotype.Service
 
 @Service
 class AuthService {
-    fun signup() {}
-    fun login(loginRequest: LoginRequest): String {
-        return "dummy token - this is example";
+    fun signup(signupRequest: SignupRequest): SignupResponse {
+        return SignupResponse().apply {
+            result = true
+        }
     }
 
-    fun logout() {}
-    fun verifyMail() {}
+    fun login(loginRequest: LoginRequest): LoginResponse {
+        return LoginResponse().apply {
+            result = true
+            jwtToken = "dummy"
+        }
+    }
+
+    fun logout(): Boolean {
+        return true
+    }
+
+    fun verifyMail(token: String): VerifyMailResponse {
+        return VerifyMailResponse().apply {
+            result = true
+        }
+    }
 }

@@ -14,7 +14,16 @@ spring:
   application:
     name: eco-picker-api
 
+gemini:
+  app-key: ${APP_KEY}
+
 logging:
   level:
     root: INFO
     com.eco_picker: DEBUG
+    
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
