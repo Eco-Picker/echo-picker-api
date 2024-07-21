@@ -3,9 +3,12 @@ package com.eco_picker.api.domain.user.data.dto
 import com.eco_picker.api.global.data.BaseResponse
 import io.swagger.v3.oas.annotations.media.Schema
 
-class LoginResponse : BaseResponse<LoginResponse.Code>() {
-    @field:Schema(description = "JWT Token", nullable = true)
-    var jwtToken: String? = null
+data class LoginResponse(
+    @field:Schema(description = "access Token", nullable = true)
+    val accessToken: String?,
+    @field:Schema(description = "refresh Token", nullable = true)
+    val refreshToken: String?
+) : BaseResponse<LoginResponse.Code>() {
 
     enum class Code {
         LOGIN_FAILED,

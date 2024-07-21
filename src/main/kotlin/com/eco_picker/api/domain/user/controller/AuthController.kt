@@ -30,6 +30,22 @@ class AuthController(private val authService: AuthService) {
 
     @Operation(
         tags = [OperationTag.AUTHENTICATION],
+        summary = "Renew a access token",
+    )
+    @PostMapping("/auth/renew_access_token")
+    fun renewAccessToken(@RequestBody renewAccessTokenRequest: RenewAccessTokenRequest): RenewAccessTokenResponse {
+        val accessToken = this.authService.renewAccessToken(renewAccessTokenRequest.refreshToken)
+        accessToken?.let {
+            return RenewAccessTokenResponse(accessToken).apply {
+                result = true
+            }
+        }
+        return RenewAccessTokenResponse()
+    }
+
+
+    @Operation(
+        tags = [OperationTag.AUTHENTICATION],
         summary = "Logout",
     )
     @PostMapping("/auth/logout")

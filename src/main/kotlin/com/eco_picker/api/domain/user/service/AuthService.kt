@@ -1,10 +1,16 @@
 package com.eco_picker.api.domain.user.service
 
 import com.eco_picker.api.domain.user.data.dto.*
+import com.eco_picker.api.global.support.JwtManager
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.stereotype.Service
 
 @Service
-class AuthService {
+class AuthService(
+    private val authenticationManager: AuthenticationManager,
+    private val jwtManager: JwtManager
+) {
     fun signup(signupRequest: SignupRequest): SignupResponse {
         return SignupResponse().apply {
             result = true
@@ -12,10 +18,30 @@ class AuthService {
     }
 
     fun login(loginRequest: LoginRequest): LoginResponse {
-        return LoginResponse().apply {
+        val authentication = authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
+        )
+        val username = authentication.name
+        val accessToken = jwtManager.generateAccessToken(username = username)
+        val refreshToken = jwtManager.generateRefreshToken(username = username)
+
+        return LoginResponse(
+            accessToken = accessToken,
+            refreshToken = refreshToken
+        ).apply {
             result = true
-            jwtToken = "dummy"
         }
+    }
+
+    fun renewAccessToken(refreshToken: String): String? {
+        if (jwtManager.validateRefreshToken(refreshToken)) {
+            val username = jwtManager.getUsernameFromRefreshToken(refreshToken)
+            username?.let {
+                val newAccessToken = jwtManager.generateAccessToken(it)
+                return@let newAccessToken
+            }
+        }
+        return null
     }
 
     fun logout(): Boolean {
