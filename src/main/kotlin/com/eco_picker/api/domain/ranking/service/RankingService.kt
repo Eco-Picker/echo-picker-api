@@ -7,19 +7,19 @@ import org.springframework.stereotype.Service
 
 @Service
 class RankingService {
-    fun getDailyRanking(userId: Long): Ranking {
-        return this.getRanking(userId, RankingPeriod.DAILY)
+    fun getDailyRanking(userId: Long, offset: Int, limit: Int): Ranking {
+        return this.getRanking(userId, RankingPeriod.DAILY, offset, limit)
     }
 
-    fun getWeeklyRanking(userId: Long): Ranking {
-        return this.getRanking(userId, RankingPeriod.WEEKLY)
+    fun getWeeklyRanking(userId: Long, offset: Int, limit: Int): Ranking {
+        return this.getRanking(userId, RankingPeriod.WEEKLY, offset, limit)
     }
 
-    fun getMonthlyRanking(userId: Long): Ranking {
-        return this.getRanking(userId, RankingPeriod.MONTHLY)
+    fun getMonthlyRanking(userId: Long, offset: Int, limit: Int): Ranking {
+        return this.getRanking(userId, RankingPeriod.MONTHLY, offset, limit)
     }
 
-    private fun getRanking(userId: Long, period: RankingPeriod): Ranking {
+    private fun getRanking(userId: Long, period: RankingPeriod, offset: Int, limit: Int): Ranking {
         return when (period) {
             RankingPeriod.DAILY -> Ranking(
                 rankers = listOf(

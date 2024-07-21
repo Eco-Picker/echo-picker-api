@@ -1,8 +1,8 @@
 package com.eco_picker.api.domain.ranking.controller
 
-import com.eco_picker.api.domain.ranking.data.dto.GetRankingRequest
 import com.eco_picker.api.domain.ranking.data.dto.GetRankingResponse
 import com.eco_picker.api.domain.ranking.service.RankingService
+import com.eco_picker.api.global.data.BaseListRequest
 import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
 import com.eco_picker.api.global.document.OperationTag
@@ -22,9 +22,10 @@ class RankingController(private val rankingService: RankingService) {
     @PostMapping("/ranking/daily")
     fun getDailyRanking(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @RequestBody getRankingRequest: GetRankingRequest
+        @RequestBody baseListRequest: BaseListRequest
     ): GetRankingResponse {
-        val ranking = rankingService.getDailyRanking(principal.id)
+        val ranking =
+            rankingService.getDailyRanking(principal.id, offset = baseListRequest.offset, limit = baseListRequest.limit)
         return GetRankingResponse(ranking = ranking).apply { result = true }
     }
 
@@ -36,9 +37,13 @@ class RankingController(private val rankingService: RankingService) {
     @PostMapping("/ranking/weekly")
     fun getWeeklyRanking(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @RequestBody getRankingRequest: GetRankingRequest
+        @RequestBody baseListRequest: BaseListRequest
     ): GetRankingResponse {
-        val ranking = rankingService.getWeeklyRanking(principal.id)
+        val ranking = rankingService.getWeeklyRanking(
+            principal.id,
+            offset = baseListRequest.offset,
+            limit = baseListRequest.limit
+        )
         return GetRankingResponse(ranking = ranking).apply { result = true }
     }
 
@@ -50,9 +55,13 @@ class RankingController(private val rankingService: RankingService) {
     @PostMapping("/ranking/monthly")
     fun getMonthlyRanking(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @RequestBody getRankingRequest: GetRankingRequest
+        @RequestBody baseListRequest: BaseListRequest
     ): GetRankingResponse {
-        val ranking = rankingService.getMonthlyRanking(principal.id)
+        val ranking = rankingService.getMonthlyRanking(
+            principal.id,
+            offset = baseListRequest.offset,
+            limit = baseListRequest.limit
+        )
         return GetRankingResponse(ranking = ranking).apply { result = true }
     }
 
