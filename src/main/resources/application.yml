@@ -14,6 +14,9 @@ spring:
   application:
     name: eco-picker-api
 
+file:
+  max-file-size-mb: 5
+
 security:
   jwt:
     issuer: ${JWT_ISSUER}

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.ZonedDateTime
 
 data class Garbage(
-    @field:Schema(description = "ID (PK)", required = true)
+    @field:Schema(description = "garbage ID (PK)", required = true)
     val id: Long,
 
     @field:Schema(description = "name from Gemini", required = true)
