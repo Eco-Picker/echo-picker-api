@@ -33,7 +33,8 @@ class AuthService(
         }
     }
 
-    fun renewAccessToken(refreshToken: String): String? {
+    fun renewAccessToken(userId: Long, refreshToken: String): String? {
+        // @todo db 에서도 유효성 검사 (by userId, token)
         if (jwtManager.validateRefreshToken(refreshToken)) {
             val username = jwtManager.getUsernameFromRefreshToken(refreshToken)
             username?.let {
@@ -44,7 +45,7 @@ class AuthService(
         return null
     }
 
-    fun logout(): Boolean {
+    fun logout(userId: Long): Boolean {
         return true
     }
 

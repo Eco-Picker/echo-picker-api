@@ -4,8 +4,12 @@ import com.eco_picker.api.domain.user.data.dto.UpdatePasswordRequest
 import com.eco_picker.api.domain.user.data.dto.UpdatePasswordResponse
 import com.eco_picker.api.domain.user.data.dto.UserInfoResponse
 import com.eco_picker.api.domain.user.service.UserService
+import com.eco_picker.api.global.data.UserPrincipal
+import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
 import com.eco_picker.api.global.document.OperationTag
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -13,11 +17,12 @@ import org.springframework.web.bind.annotation.*
 class UserController(private val userService: UserService) {
     @Operation(
         tags = [OperationTag.USER],
+        security = [SecurityRequirement(name = JWT)],
         summary = "Get a user information",
     )
     @GetMapping("info")
-    fun getInfo(): UserInfoResponse {
-        val userInfo = userService.getInfo()
+    fun getInfo(@AuthenticationPrincipal principal: UserPrincipal): UserInfoResponse {
+        val userInfo = userService.getInfo(userId = principal.id)
         return UserInfoResponse().apply {
             result = true
             this.userInfo = userInfo
@@ -26,10 +31,14 @@ class UserController(private val userService: UserService) {
 
     @Operation(
         tags = [OperationTag.USER],
+        security = [SecurityRequirement(name = JWT)],
         summary = "Update a user password",
     )
     @PostMapping("update_password")
-    fun updatePassword(@RequestBody updatePasswordRequest: UpdatePasswordRequest): UpdatePasswordResponse {
-        return userService.updatePassword(updatePasswordRequest)
+    fun updatePassword(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @RequestBody updatePasswordRequest: UpdatePasswordRequest
+    ): UpdatePasswordResponse {
+        return userService.updatePassword(userId = principal.id, params = updatePasswordRequest)
     }
 }

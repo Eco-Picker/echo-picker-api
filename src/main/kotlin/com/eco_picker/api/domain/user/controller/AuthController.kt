@@ -3,9 +3,13 @@ package com.eco_picker.api.domain.user.controller
 import com.eco_picker.api.domain.user.data.dto.*
 import com.eco_picker.api.domain.user.service.AuthService
 import com.eco_picker.api.global.data.DefaultResponse
+import com.eco_picker.api.global.data.UserPrincipal
+import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
 import com.eco_picker.api.global.document.OperationTag
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -30,11 +34,18 @@ class AuthController(private val authService: AuthService) {
 
     @Operation(
         tags = [OperationTag.AUTHENTICATION],
+        security = [SecurityRequirement(name = JWT)],
         summary = "Renew a access token",
     )
     @PostMapping("/auth/renew_access_token")
-    fun renewAccessToken(@RequestBody renewAccessTokenRequest: RenewAccessTokenRequest): RenewAccessTokenResponse {
-        val accessToken = this.authService.renewAccessToken(renewAccessTokenRequest.refreshToken)
+    fun renewAccessToken(
+        @AuthenticationPrincipal principal: UserPrincipal,
+        @RequestBody renewAccessTokenRequest: RenewAccessTokenRequest
+    ): RenewAccessTokenResponse {
+        val accessToken = this.authService.renewAccessToken(
+            userId = principal.id,
+            refreshToken = renewAccessTokenRequest.refreshToken
+        )
         accessToken?.let {
             return RenewAccessTokenResponse(accessToken).apply {
                 result = true
@@ -46,11 +57,12 @@ class AuthController(private val authService: AuthService) {
 
     @Operation(
         tags = [OperationTag.AUTHENTICATION],
+        security = [SecurityRequirement(name = JWT)],
         summary = "Logout",
     )
     @PostMapping("/auth/logout")
-    fun logout(): DefaultResponse {
-        val result = authService.logout()
+    fun logout(@AuthenticationPrincipal principal: UserPrincipal): DefaultResponse {
+        val result = authService.logout(principal.id)
         return DefaultResponse().apply {
             this.result = result
         }

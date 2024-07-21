@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class UserService {
-    fun getInfo(): UserInfo {
+    fun getInfo(userId: Long): UserInfo {
         return UserInfo(id = 1, username = "mihee", email = "test@test.com")
     }
 
-    fun updatePassword(updatePasswordRequest: UpdatePasswordRequest): UpdatePasswordResponse {
+    fun updatePassword(userId: Long, params: UpdatePasswordRequest): UpdatePasswordResponse {
         return UpdatePasswordResponse().apply {
             result = true
         }

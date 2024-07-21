@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -27,10 +28,17 @@ class JwtAuthenticationFilter : OncePerRequestFilter() {
         val token = getAccessTokenFromRequest(request)
 
         if (token != null && jwtManager.validateAccessToken(token)) {
-            val username = jwtManager.getUsernameFromAccessToken(token)
-            val userDetails = userDetailsService.loadUserByUsername(username)
-            val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-            SecurityContextHolder.getContext().authentication = authentication
+            try {
+                val username = jwtManager.getUsernameFromAccessToken(token)
+                val userDetails = userDetailsService.loadUserByUsername(username)
+                val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+                SecurityContextHolder.getContext().authentication = authentication
+                logger.debug("User authenticated: $username")
+            } catch (ex: UsernameNotFoundException) {
+                logger.warn("User not found: ${ex.message}")
+            } catch (ex: Exception) {
+                logger.error("Authentication error: ${ex.message}", ex)
+            }
         }
 
         filterChain.doFilter(request, response)
