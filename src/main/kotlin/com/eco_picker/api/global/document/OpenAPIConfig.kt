@@ -32,7 +32,21 @@ class OpenAPIConfig {
         return OpenAPI()
             .info(
                 Info().title("Eco Picker API")
-                    .description("The Eco Picker API")
+                    .description(
+                        "This API is based on the Eco Picker project.\n" +
+                                "- Many APIs are currently dummy implementations, provided to offer interfaces as soon as possible. Refer only to the request and response formats.\n" +
+                                "- Only `POST` and `GET` methods are supported.\n" +
+                                "- Common response format:\n" +
+                                "  ```json\n" +
+                                "  {\n" +
+                                "    \"result\": boolean,\n" +
+                                "    \"message\": string?, // Present only if an error occurs\n" +
+                                "    \"code\": string?, // Present only if an error occurs\n" +
+                                "    \"timestamp\": datetime,\n" +
+                                "    ...\n" +
+                                "  }\n" +
+                                "[TODO] Domain: `\"https://eco-picker.com\"`, `\"https://eco-picker.io\"`, or other domains.\n"
+                    )
                     .version("1.0")
                     .contact(
                         Contact()
