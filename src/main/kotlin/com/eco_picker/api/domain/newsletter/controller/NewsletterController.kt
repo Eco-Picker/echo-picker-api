@@ -1,5 +1,6 @@
 package com.eco_picker.api.domain.newsletter.controller
 
+import com.eco_picker.api.domain.newsletter.data.dto.GetNewsLetterIdResponse
 import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterResponse
 import com.eco_picker.api.domain.newsletter.data.dto.GetNewslettersResponse
 import com.eco_picker.api.domain.newsletter.service.NewsletterService
@@ -14,6 +15,19 @@ import org.springframework.web.bind.annotation.*
 
 @RestController()
 class NewsletterController(private val newsletterService: NewsletterService) {
+    @Operation(
+        tags = [OperationTag.NEWSLETTER],
+        security = [SecurityRequirement(name = JWT)],
+        summary = "Get an random newsletter id",
+    )
+    @GetMapping("/random_newsletter_id")
+    fun getRandomNewsletterId(): GetNewsLetterIdResponse {
+        val newsletterId = this.newsletterService.getRandomNewsletterId();
+        return GetNewsLetterIdResponse(id = newsletterId).apply {
+            result = true
+        }
+    }
+
     @Operation(
         tags = [OperationTag.NEWSLETTER],
         security = [SecurityRequirement(name = JWT)],
