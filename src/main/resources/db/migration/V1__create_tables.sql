@@ -1,16 +1,16 @@
 -- User Table
 CREATE TABLE user (
     user_id VARCHAR(50) PRIMARY KEY,
-    email VARCHAR(100) NOT NULL,
-    password VARCHAR(100) NOT NULL,
-    onboarding_status INT NOT NULL,
+    user_email VARCHAR(100) NOT NULL,
+    user_password VARCHAR(100) NOT NULL,
+    user_onboarding_status INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Garbage Table
 CREATE TABLE garbage (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    garbage_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50),
     garbage_type VARCHAR(50),
     garbage_detail TEXT,
@@ -35,9 +35,9 @@ CREATE TABLE auth (
 
 -- GarbageMonthly Table
 CREATE TABLE garbage_monthly (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    garbage_monthly_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50),
-    month VARCHAR(6),
+    collected_month VARCHAR(6),
     plastic INT,
     metal INT,
     glass INT,
