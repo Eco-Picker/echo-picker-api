@@ -1,5 +1,6 @@
 package com.eco_picker.api.domain.user.service
 
+import com.eco_picker.api.domain.mail.service.MailService
 import com.eco_picker.api.domain.user.data.dto.*
 import com.eco_picker.api.global.support.JwtManager
 import org.springframework.security.authentication.AuthenticationManager
@@ -9,9 +10,16 @@ import org.springframework.stereotype.Service
 @Service
 class AuthService(
     private val authenticationManager: AuthenticationManager,
-    private val jwtManager: JwtManager
+    private val jwtManager: JwtManager,
+    private val mailService: MailService
 ) {
     fun signup(signupRequest: SignupRequest): SignupResponse {
+        val (username, password, email) = signupRequest
+        // @todo validate
+        // @todo insert
+        // @todo send a mail
+        val token = ""
+        mailService.sendVerify(username = username, email = email, token = token)
         return SignupResponse().apply {
             result = true
         }
@@ -55,9 +63,11 @@ class AuthService(
         }
     }
 
-    fun sendTempPassword(): Boolean {
+    fun sendTempPassword(email: String): Boolean {
         val tempPassword = this.generateTempPassword()
+        val username = "" // @todo get from db
         // @todo send mail
+        mailService.sendTempPassword(username = username, email = email, password = tempPassword)
         return true
     }
 

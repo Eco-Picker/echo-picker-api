@@ -86,7 +86,7 @@ class AuthController(private val authService: AuthService) {
     )
     @PostMapping("/p/auth/send_temp_password")
     fun sendTempPasswordMail(@RequestBody sendTempPasswordRequest: SendTempPasswordRequest): DefaultResponse {
-        val result = this.authService.sendTempPassword()
+        val result = this.authService.sendTempPassword(email = sendTempPasswordRequest.email)
         return DefaultResponse().apply {
             this.result = result
         }

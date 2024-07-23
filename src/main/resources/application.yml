@@ -7,12 +7,30 @@ server:
 general:
   api-base-url: ${API_BASE_URL}
   app-base-url: ${APP_BASE_URL}
-  app-private-base-url: ${APP_PRIVATE_BASE_URL}
   static-base-url: ${STATIC_BASE_URL}
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: eco-picker-api
+  thymeleaf:
+    prefix: classpath:/template/
+    suffix: .html,.js
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+    debug: true
+
 
 file:
   max-file-size-mb: 5
