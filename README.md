@@ -21,6 +21,12 @@ cd eco-picker-api
 cp .env.exmaple .env
 ```
 
+### build
+
+```shell
+./gradle build 
+```
+
 ### bootRun
 
 ```shell
