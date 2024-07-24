@@ -6,7 +6,7 @@
 - Gradle
 - IDE (IntelliJ IDEA recommended)
 
-## Getting Started
+B## Getting Started
 
 ### git clone
 
@@ -18,7 +18,7 @@ cd eco-picker-api
 ### set an env file
 
 ```shell
-cp .env.exmaple .env
+cp .env.example .env
 ```
 
 ### build
