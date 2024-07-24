@@ -57,7 +57,7 @@ CREATE TABLE ranking (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50),
     ranking_period VARCHAR(20) NOT NULL, -- using prefix to avoid potential compatibility issues (values: 'daily', 'weekly', 'monthly')
-    rank INT NOT NULL,
+    ranking INT NOT NULL, -- using prefix to avoid potential compatibility issues
     score INT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL,
