@@ -1,6 +1,6 @@
 -- User Table
 CREATE TABLE user (
-    id VARCHAR(50) PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     user_password VARCHAR(100) NOT NULL, -- using prefix to avoid potential compatibility issues
@@ -26,7 +26,7 @@ CREATE TABLE garbage (
 
 -- Auth Table
 CREATE TABLE auth (
-    id VARCHAR(50) PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50),
     access_token VARCHAR(1000),
     refresh_token VARCHAR(1000),
