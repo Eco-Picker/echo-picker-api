@@ -29,7 +29,6 @@ spring:
           starttls:
             enable: true
             required: true
-    debug: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

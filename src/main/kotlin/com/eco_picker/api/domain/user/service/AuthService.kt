@@ -59,7 +59,7 @@ class AuthService(
                 )
             )
 
-            if (newUserEntity?.id == null) {
+            if (newUserEntity.id == null) {
                 throw Exception("Failed to create user")
             }
 

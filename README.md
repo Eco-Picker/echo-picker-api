@@ -27,6 +27,15 @@ cp .env.example .env
 ./gradle build 
 ```
 
+## [Optional] Docker-compose for mysql
+
+✅ check environment at docker-compose.yml
+
+```shell
+cd docker
+docker-compose up -d 
+```
+
 ### bootRun
 
 ```shell
@@ -49,9 +58,7 @@ For any questions or feedback, please contact
 
 ### TODO
 
-- [ ] convention
 - [ ] encrypt/decrypt properties
-- [ ] set up db
 - [ ] set up logging
 - [ ] images - s3, local, etc
 - [ ] locations - map
