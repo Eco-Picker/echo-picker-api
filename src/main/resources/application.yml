@@ -37,11 +37,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${DB_DDL_AUTO_GENERATE_TYPE}
+    show-sql: ${DB_USE_DEBUG_MODE}
     properties:
       hibernate:
-        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: ${DB_USE_DEBUG_MODE}
+        use_sql_comments: ${DB_USE_DEBUG_MODE}
 
 
 file:

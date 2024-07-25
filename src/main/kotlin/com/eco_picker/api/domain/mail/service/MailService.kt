@@ -59,8 +59,9 @@ class MailService(
         try {
             logger.debug { "Attempting to send ${type.name} mail to $to" }
             mailSender.send(mimeMessage)
+            logger.debug { "[OK] Successfully sent to $to" }
         } catch (e: Exception) {
-            logger.error(e) { "error occurred while send email." }
+            logger.error(e) { "error occurred while send ${type.name} mail to $to" }
         }
     }
 }

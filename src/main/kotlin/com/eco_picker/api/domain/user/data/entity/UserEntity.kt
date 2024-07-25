@@ -1,15 +1,16 @@
-package com.eco_picker.api.domain.user.data
+package com.eco_picker.api.domain.user.data.entity
 
+import com.eco_picker.api.domain.user.constant.OnboardingStatus
 import jakarta.persistence.*
 import java.time.ZonedDateTime
-import com.eco_picker.api.domain.user.constant.OnboardingStatus
 
 @Entity
 @Table(name = "user")
-data class User(
+data class UserEntity(
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    val id: Long,
+    val id: Long? = null,
 
     @Column(name = "username", nullable = false)
     val username: String,
@@ -25,8 +26,8 @@ data class User(
     val onboardingStatus: OnboardingStatus,
 
     @Column(name = "created_at", nullable = false)
-    val createdAt: ZonedDateTime,
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
     @Column(name = "updated_at")
-    var updatedAt: ZonedDateTime? // UserService 의 updatePassword 펑션에서 reassign 해야 되니까
+    var updatedAt: ZonedDateTime? = null// UserService 의 updatePassword 펑션에서 reassign 해야 되니까
 )

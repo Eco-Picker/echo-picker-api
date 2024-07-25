@@ -1,27 +1,87 @@
 package com.eco_picker.api.domain.user.service
 
 import com.eco_picker.api.domain.mail.service.MailService
+import com.eco_picker.api.domain.user.constant.OnboardingStatus
 import com.eco_picker.api.domain.user.data.dto.*
+import com.eco_picker.api.domain.user.data.entity.UserEmailVerificationEntity
+import com.eco_picker.api.domain.user.data.entity.UserEntity
+import com.eco_picker.api.domain.user.repository.UserEmailVerificationRepository
+import com.eco_picker.api.domain.user.repository.UserRepository
 import com.eco_picker.api.global.support.JwtManager
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.ZonedDateTime
+import java.util.*
 
 @Service
 class AuthService(
     private val authenticationManager: AuthenticationManager,
     private val jwtManager: JwtManager,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val userRepository: UserRepository,
+    private val userEmailVerifyRepository: UserEmailVerificationRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
+    private val logger = KotlinLogging.logger { }
+
     fun signup(signupRequest: SignupRequest): SignupResponse {
         val (username, password, email) = signupRequest
-        // @todo validate
-        // @todo insert
-        // @todo send a mail
-        val token = ""
-        mailService.sendVerify(username = username, email = email, token = token)
-        return SignupResponse().apply {
-            result = true
+
+        try {
+            val userEntity = userRepository.findByUsernameOrEmail(username = username, email = email)
+            userEntity?.let {
+                if (it.username == username) {
+                    return SignupResponse().apply {
+                        code = SignupResponse.Code.ALREADY_REGISTERED_USERNAME
+                    }
+                }
+                if (it.email == email) {
+                    return SignupResponse().apply {
+                        code = SignupResponse.Code.ALREADY_REGISTERED_EMAIL
+                    }
+                }
+                if (it.onboardingStatus == OnboardingStatus.PENDING_VERIFY) {
+                    return SignupResponse().apply {
+                        code = SignupResponse.Code.PENDING_VERIFY_EMAIL
+                    }
+                }
+            }
+
+            val newUserEntity = userRepository.save(
+                UserEntity(
+                    username = username,
+                    email = email,
+                    password = passwordEncoder.encode(password),
+                    onboardingStatus = OnboardingStatus.BEGIN,
+                )
+            )
+
+            if (newUserEntity?.id == null) {
+                throw Exception("Failed to create user")
+            }
+
+            val verifyMailToken = UUID.randomUUID().toString()
+            userEmailVerifyRepository.save(
+                UserEmailVerificationEntity(
+                    token = verifyMailToken,
+                    userId = newUserEntity.id,
+                    issuedAt = ZonedDateTime.now()
+                )
+            )
+
+            mailService.sendVerify(username = username, email = email, token = verifyMailToken)
+            return SignupResponse().apply {
+                result = true
+            }
+
+        } catch (e: Exception) {
+            logger.error(e) { "failed to sign up $username" }
+            return SignupResponse().apply {
+                message = e.message
+            }
         }
     }
 
@@ -58,6 +118,40 @@ class AuthService(
     }
 
     fun verifyMail(token: String): VerifyMailResponse {
+        try {
+            val userEmailVerificationEntity = userEmailVerifyRepository.findByToken(token)
+                ?: return VerifyMailResponse().apply {
+                    code = VerifyMailResponse.Code.INVALIDATED_TOKEN
+                }
+
+            userEmailVerificationEntity.let {
+                if (it.verifiedAt != null) {
+                    return VerifyMailResponse().apply {
+                        code = VerifyMailResponse.Code.ALREADY_VERIFIED_USER
+                    }
+                }
+                if (it.issuedAt.plusMinutes(10).isBefore(ZonedDateTime.now())) {
+                    return VerifyMailResponse().apply {
+                        code = VerifyMailResponse.Code.INVALIDATED_TOKEN
+                    }
+                }
+                val userEntity = userRepository.findById(it.userId)
+                if (userEntity.isEmpty) {
+                    return VerifyMailResponse().apply {
+                        code = VerifyMailResponse.Code.INVALIDATED_TOKEN
+                    }
+                }
+
+                userEmailVerifyRepository.save(it.copy(verifiedAt = ZonedDateTime.now()))
+                userRepository.save(userEntity.get().copy(onboardingStatus = OnboardingStatus.COMPLETE))
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "failed to verify email verification" }
+            return VerifyMailResponse().apply {
+                message = e.message
+            }
+        }
+
         return VerifyMailResponse().apply {
             result = true
         }
