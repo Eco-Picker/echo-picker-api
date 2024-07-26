@@ -72,8 +72,6 @@ class UserService (
 
         return UpdatePasswordResponse().apply {
             result = true
-            code = UpdatePasswordResponse.Code.SUCCESS
-            message = "Password updated successfully."
         }
     }
 }

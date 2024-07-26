@@ -1,4 +1,6 @@
 package com.eco_picker.api.domain.ranking.data.dto
 
-class GetRankerDetailResponse {
-}
+import com.eco_picker.api.domain.ranking.data.Ranker
+import com.eco_picker.api.global.data.DefaultResponse
+
+data class GetRankerDetailResponse(val ranker: Ranker) : DefaultResponse()
