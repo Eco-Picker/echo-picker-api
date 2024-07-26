@@ -24,7 +24,7 @@ cp .env.example .env
 ### build
 
 ```shell
-./gradle build 
+./gradlew build 
 ```
 
 ## [Optional] Docker-compose for mysql
