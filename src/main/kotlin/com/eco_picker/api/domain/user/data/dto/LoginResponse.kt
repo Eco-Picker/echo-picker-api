@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 data class LoginResponse(
     @field:Schema(description = "access Token", nullable = true)
-    val accessToken: String?,
+    val accessToken: String? = null,
     @field:Schema(description = "refresh Token", nullable = true)
-    val refreshToken: String?
+    val refreshToken: String? = null
 ) : BaseResponse<LoginResponse.Code>() {
 
     enum class Code {

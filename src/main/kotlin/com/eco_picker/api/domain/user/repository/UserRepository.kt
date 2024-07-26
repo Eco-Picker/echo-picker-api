@@ -5,8 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-// Deal with CRUD operations regarding User entity
-
 interface UserRepository : JpaRepository<UserEntity, Long> {
     fun findByUsername(username: String): UserEntity?
 

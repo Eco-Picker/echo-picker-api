@@ -2,17 +2,22 @@ package com.eco_picker.api.domain.user.service
 
 import com.eco_picker.api.domain.mail.service.MailService
 import com.eco_picker.api.domain.user.constant.OnboardingStatus
+import com.eco_picker.api.domain.user.data.Jwt
 import com.eco_picker.api.domain.user.data.dto.*
+import com.eco_picker.api.domain.user.data.entity.AuthEntity
 import com.eco_picker.api.domain.user.data.entity.UserEmailVerificationEntity
 import com.eco_picker.api.domain.user.data.entity.UserEntity
+import com.eco_picker.api.domain.user.repository.AuthRepository
 import com.eco_picker.api.domain.user.repository.UserEmailVerificationRepository
 import com.eco_picker.api.domain.user.repository.UserRepository
+import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.support.JwtManager
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -23,10 +28,12 @@ class AuthService(
     private val mailService: MailService,
     private val userRepository: UserRepository,
     private val userEmailVerifyRepository: UserEmailVerificationRepository,
+    private val authRepository: AuthRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
     private val logger = KotlinLogging.logger { }
 
+    @Transactional
     fun signup(signupRequest: SignupRequest): SignupResponse {
         val (username, password, email) = signupRequest
 
@@ -55,7 +62,7 @@ class AuthService(
                     username = username,
                     email = email,
                     password = passwordEncoder.encode(password),
-                    onboardingStatus = OnboardingStatus.BEGIN,
+                    onboardingStatus = OnboardingStatus.COMPLETE, // @todo BEGIN 으로 바꾸기, local test flag 추가
                 )
             )
 
@@ -72,7 +79,8 @@ class AuthService(
                 )
             )
 
-            mailService.sendVerify(username = username, email = email, token = verifyMailToken)
+            // @todo frontend 테스트 중에는 잠시 제거 (flag 추가)
+            // mailService.sendVerify(username = username, email = email, token = verifyMailToken)
             return SignupResponse().apply {
                 result = true
             }
@@ -86,23 +94,52 @@ class AuthService(
     }
 
     fun login(loginRequest: LoginRequest): LoginResponse {
-        val authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
-        )
-        val username = authentication.name
-        val accessToken = jwtManager.generateAccessToken(username = username)
-        val refreshToken = jwtManager.generateRefreshToken(username = username)
+        try {
+            val authentication = authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password)
+            )
 
-        return LoginResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken
-        ).apply {
-            result = true
+            val userPrincipal = authentication.principal as UserPrincipal
+            val userId: Long = userPrincipal.id
+            val username: String = userPrincipal.username
+            val onboardingStatus = userPrincipal.getOnboardingStatus()
+
+            if (onboardingStatus != OnboardingStatus.COMPLETE) {
+                return LoginResponse().apply {
+                    result = false
+                    code = LoginResponse.Code.EMAIL_NOT_VERIFIED
+                }
+            }
+            // @todo add user db column (user login try count)
+            val accessToken: Jwt = jwtManager.generateAccessToken(username = username)
+            val refreshToken: Jwt = jwtManager.generateRefreshToken(username = username)
+
+            authRepository.save(
+                AuthEntity(
+                    userId = userId,
+                    accessToken = accessToken.token,
+                    expiresAt = accessToken.expiresAt,
+                    refreshToken = refreshToken.token,
+                    refreshExpiresAt = refreshToken.expiresAt
+                )
+            )
+
+            return LoginResponse(
+                accessToken = accessToken.token,
+                refreshToken = refreshToken.token,
+            ).apply {
+                result = true
+            }
+
+        } catch (e: Exception) {
+            return LoginResponse().apply {
+                message = e.message
+                code = LoginResponse.Code.LOGIN_FAILED
+            }
         }
     }
 
     fun renewAccessToken(userId: Long, refreshToken: String): String? {
-        // @todo db 에서도 유효성 검사 (by userId, token)
         if (jwtManager.validateRefreshToken(refreshToken)) {
             val username = jwtManager.getUsernameFromRefreshToken(refreshToken)
             username?.let {
@@ -114,7 +151,8 @@ class AuthService(
     }
 
     fun logout(userId: Long): Boolean {
-        return true
+        val deletedCount = authRepository.deleteByUserId(userId = userId)
+        return deletedCount > 0
     }
 
     fun verifyMail(token: String): VerifyMailResponse {

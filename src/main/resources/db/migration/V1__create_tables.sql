@@ -29,9 +29,11 @@ CREATE TABLE auth (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(50),
     access_token VARCHAR(1000),
+    expires_at TIMESTAMP NOT NULL,
     refresh_token VARCHAR(1000),
+    refresh_expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NULL,
+    last_used_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 

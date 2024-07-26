@@ -21,7 +21,8 @@ class JwtUserDetailsService(private val userRepository: UserRepository) :
             id = userEntity.id!!,
             username = userEntity.username,
             password = userEntity.password,
-            authorities = authorities
+            authorities = authorities,
+            onboardingStatus = userEntity.onboardingStatus,
         )
     }
 }
