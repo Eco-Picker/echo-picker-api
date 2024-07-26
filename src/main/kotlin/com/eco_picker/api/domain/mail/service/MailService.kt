@@ -37,10 +37,9 @@ class MailService(
     }
 
     fun sendTempPassword(username: String, email: String, password: String) {
-        val loginUrl = "${generalProperties.apiBaseUrl}/p/auth/login"
         val context = Context().apply {
             setVariable("username", username)
-            setVariable("loginUrl", loginUrl)
+            setVariable("tempPassword", password)
         }
         val subject = "Your Temporary Password"
         val template = "temp-password.html"
@@ -59,9 +58,9 @@ class MailService(
         try {
             logger.debug { "Attempting to send ${type.name} mail to $to" }
             mailSender.send(mimeMessage)
-            logger.debug { "[OK] Successfully sent to $to" }
+            logger.debug { "Successfully sent to $to" }
         } catch (e: Exception) {
-            logger.error(e) { "error occurred while send ${type.name} mail to $to" }
+            logger.error(e) { "Error occurred while send ${type.name} mail to $to" }
         }
     }
 }

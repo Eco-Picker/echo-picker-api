@@ -33,7 +33,7 @@ CREATE TABLE auth (
     refresh_token VARCHAR(1000),
     refresh_expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    last_used_at TIMESTAMP DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 

@@ -26,8 +26,8 @@ data class AuthEntity(
     @Column(name = "refresh_expires_at", nullable = false)
     val refreshExpiresAt: ZonedDateTime,
 
-    @Column(name = "last_used_at")
-    val lastUsedAt: ZonedDateTime? = null,
+    @Column(name = "updated_at")
+    val updatedAt: ZonedDateTime? = null,
 
     @Column(name = "created_at", nullable = false)
     val createdAt: ZonedDateTime = ZonedDateTime.now(),

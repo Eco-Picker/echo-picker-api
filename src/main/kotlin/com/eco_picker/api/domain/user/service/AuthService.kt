@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.security.SecureRandom
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -86,7 +87,7 @@ class AuthService(
             }
 
         } catch (e: Exception) {
-            logger.error(e) { "failed to sign up $username" }
+            logger.error(e) { "Failed to sign up $username" }
             return SignupResponse().apply {
                 message = e.message
             }
@@ -110,7 +111,7 @@ class AuthService(
                     code = LoginResponse.Code.EMAIL_NOT_VERIFIED
                 }
             }
-            // @todo add user db column (user login try count)
+            // @todo add user db column (user login try count) - 우선순위 낮음
             val accessToken: Jwt = jwtManager.generateAccessToken(username = username)
             val refreshToken: Jwt = jwtManager.generateRefreshToken(username = username)
 
@@ -139,19 +140,52 @@ class AuthService(
         }
     }
 
-    fun renewAccessToken(userId: Long, refreshToken: String): String? {
-        if (jwtManager.validateRefreshToken(refreshToken)) {
+    fun renewAccessToken(userId: Long, refreshToken: String): RenewAccessTokenResponse {
+        try {
+            if (!jwtManager.validateRefreshToken(refreshToken)) {
+                return RenewAccessTokenResponse().apply {
+                    code = RenewAccessTokenResponse.Code.INVALID_REFRESH_TOKEN
+                }
+            }
             val username = jwtManager.getUsernameFromRefreshToken(refreshToken)
-            username?.let {
-                val newAccessToken = jwtManager.generateAccessToken(it)
-                return@let newAccessToken
+                ?: return RenewAccessTokenResponse().apply {
+                    code = RenewAccessTokenResponse.Code.INVALID_REFRESH_TOKEN
+                }
+
+            val authEntity =
+                authRepository.findByUserIdAndRefreshToken(userId = userId, refreshToken = refreshToken)
+                    ?: return RenewAccessTokenResponse().apply {
+                        code = RenewAccessTokenResponse.Code.INVALID_REFRESH_TOKEN
+                    }
+
+            if (authEntity.refreshExpiresAt.isBefore(ZonedDateTime.now())) {
+                return RenewAccessTokenResponse().apply {
+                    code = RenewAccessTokenResponse.Code.EXPIRED_REFRESH_TOKEN
+                }
+            }
+
+            val accessToken: Jwt = jwtManager.generateAccessToken(username)
+            authRepository.save(
+                authEntity.copy(
+                    accessToken = accessToken.token,
+                    expiresAt = accessToken.expiresAt,
+                    updatedAt = ZonedDateTime.now()
+                )
+            )
+            return RenewAccessTokenResponse(accessToken = accessToken.token).apply {
+                result = true
+            }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to renewAccessToken" }
+            return RenewAccessTokenResponse().apply {
+                message = e.message
             }
         }
-        return null
     }
 
     fun logout(userId: Long): Boolean {
         val deletedCount = authRepository.deleteByUserId(userId = userId)
+        logger.debug { "Logout userId: $userId" }
         return deletedCount > 0
     }
 
@@ -181,10 +215,12 @@ class AuthService(
                 }
 
                 userEmailVerifyRepository.save(it.copy(verifiedAt = ZonedDateTime.now()))
-                userRepository.save(userEntity.get().copy(onboardingStatus = OnboardingStatus.COMPLETE))
+                userRepository.save(
+                    userEntity.get().copy(onboardingStatus = OnboardingStatus.COMPLETE, updatedAt = ZonedDateTime.now())
+                )
             }
         } catch (e: Exception) {
-            logger.error(e) { "failed to verify email verification" }
+            logger.error(e) { "Failed to verify email verification" }
             return VerifyMailResponse().apply {
                 message = e.message
             }
@@ -196,14 +232,43 @@ class AuthService(
     }
 
     fun sendTempPassword(email: String): Boolean {
-        val tempPassword = this.generateTempPassword()
-        val username = "" // @todo get from db
-        // @todo send mail
-        mailService.sendTempPassword(username = username, email = email, password = tempPassword)
-        return true
+        try {
+            val tempPassword = this.generateTempPassword()
+            val userEntity = userRepository.findByEmail(email = email)
+            if (userEntity == null) {
+                logger.debug { "No user found with email: $email" }
+                return false
+            }
+
+            val username = userEntity.username
+            if (userEntity.onboardingStatus != OnboardingStatus.COMPLETE) {
+                logger.debug { "$username onboarding status is not COMPLETE" }
+                return false
+            }
+            userRepository.save(
+                userEntity.copy(
+                    password = passwordEncoder.encode(tempPassword),
+                    updatedAt = ZonedDateTime.now()
+                )
+            )
+            mailService.sendTempPassword(username = username, email = email, password = tempPassword)
+            return true
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to send temp password" }
+            return false
+        }
     }
 
-    private fun generateTempPassword(): String {
-        return "temp password"
+    fun generateTempPassword(length: Int = 12): String {
+        val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:',.<>?/"
+        val secureRandom = SecureRandom()
+        val password = StringBuilder(length)
+
+        for (i in 0 until length) {
+            val randomIndex = secureRandom.nextInt(characters.length)
+            password.append(characters[randomIndex])
+        }
+
+        return password.toString()
     }
 }

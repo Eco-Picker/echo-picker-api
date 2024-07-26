@@ -42,18 +42,11 @@ class AuthController(private val authService: AuthService) {
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestBody renewAccessTokenRequest: RenewAccessTokenRequest
     ): RenewAccessTokenResponse {
-        val accessToken = this.authService.renewAccessToken(
+        return this.authService.renewAccessToken(
             userId = principal.id,
             refreshToken = renewAccessTokenRequest.refreshToken
         )
-        accessToken?.let {
-            return RenewAccessTokenResponse(accessToken).apply {
-                result = true
-            }
-        }
-        return RenewAccessTokenResponse()
     }
-
 
     @Operation(
         tags = [OperationTag.AUTHENTICATION],

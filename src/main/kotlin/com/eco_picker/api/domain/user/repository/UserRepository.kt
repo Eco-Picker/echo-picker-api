@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param
 interface UserRepository : JpaRepository<UserEntity, Long> {
     fun findByUsername(username: String): UserEntity?
 
+    fun findByEmail(email: String): UserEntity?
+
     @Query("SELECT u FROM UserEntity u WHERE u.username = :username OR u.email = :email")
     fun findByUsernameOrEmail(@Param("username") username: String, @Param("email") email: String): UserEntity?
 }

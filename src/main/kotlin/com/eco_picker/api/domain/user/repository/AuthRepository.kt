@@ -9,4 +9,8 @@ interface AuthRepository : JpaRepository<AuthEntity, Long> {
     @Modifying
     @Transactional
     fun deleteByUserId(userId: Long): Int
+
+    fun findByUserIdAndAccessToken(userId: Long, accessToken: String): AuthEntity?
+
+    fun findByUserIdAndRefreshToken(userId: Long, refreshToken: String): AuthEntity?
 }
