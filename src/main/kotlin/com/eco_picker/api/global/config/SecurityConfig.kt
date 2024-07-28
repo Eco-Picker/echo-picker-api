@@ -46,7 +46,9 @@ class SecurityConfig() {
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
         configuration.allowedOrigins = listOf("*") // @todo front 도메인 확정나면 제한
-        configuration.allowedMethods = listOf("GET", "POST")
+        configuration.allowedMethods = listOf("GET", "POST", "OPTIONS")
+        configuration.allowedHeaders = listOf("*")
+        configuration.maxAge = 3600L
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
