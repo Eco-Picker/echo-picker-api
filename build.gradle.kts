@@ -6,6 +6,13 @@ plugins {
     kotlin("plugin.spring") version "1.9.24"
 }
 
+val springBootVersion: String by project
+val kotlinVersion: String by project
+val mysqlVersion: String by project
+val jacksonVersion: String by project
+val jwtVersion: String by project
+val h2Version: String by project
+
 group = "com.eco-picker"
 version = "0.0.1-SNAPSHOT"
 
@@ -30,30 +37,31 @@ configurations {
 
 dependencies {
     // spring boot
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-mustache")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-mail")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-mustache:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-mail:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
     // kotlin
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     // jwt
-    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
     // logging
     implementation("io.github.oshai:kotlin-logging:6.0.3")
     // open API
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
     // database
-    runtimeOnly("com.h2database:h2")
-    runtimeOnly("mysql:mysql-connector-java:8.0.32")
+    runtimeOnly("com.h2database:h2:$h2Version")
+    runtimeOnly("mysql:mysql-connector-java:$mysqlVersion")
     // dev
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    developmentOnly("org.springframework.boot:spring-boot-devtools:$springBootVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

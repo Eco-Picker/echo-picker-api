@@ -9,6 +9,7 @@ import com.eco_picker.api.global.document.OperationTag
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -19,7 +20,7 @@ class AuthController(private val authService: AuthService) {
         summary = "Signup",
     )
     @PostMapping("/p/auth/signup")
-    fun signup(@RequestBody signupRequest: SignupRequest): SignupResponse {
+    fun signup(@Valid @RequestBody signupRequest: SignupRequest): SignupResponse {
         return authService.signup(signupRequest)
     }
 
@@ -28,7 +29,7 @@ class AuthController(private val authService: AuthService) {
         summary = "Login",
     )
     @PostMapping("/p/auth/login")
-    fun login(@RequestBody loginRequest: LoginRequest): LoginResponse {
+    fun login(@Valid @RequestBody loginRequest: LoginRequest): LoginResponse {
         return authService.login(loginRequest)
     }
 
@@ -40,7 +41,7 @@ class AuthController(private val authService: AuthService) {
     @PostMapping("/auth/renew_access_token")
     fun renewAccessToken(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @RequestBody renewAccessTokenRequest: RenewAccessTokenRequest
+        @Valid @RequestBody renewAccessTokenRequest: RenewAccessTokenRequest
     ): RenewAccessTokenResponse {
         return this.authService.renewAccessToken(
             userId = principal.id,
@@ -78,7 +79,7 @@ class AuthController(private val authService: AuthService) {
         summary = "Send a temp password"
     )
     @PostMapping("/p/auth/send_temp_password")
-    fun sendTempPasswordMail(@RequestBody sendTempPasswordRequest: SendTempPasswordRequest): DefaultResponse {
+    fun sendTempPasswordMail(@Valid @RequestBody sendTempPasswordRequest: SendTempPasswordRequest): DefaultResponse {
         val result = this.authService.sendTempPassword(email = sendTempPasswordRequest.email)
         return DefaultResponse().apply {
             this.result = result
