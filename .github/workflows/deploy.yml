@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Build Docker image
+        run: docker build -t gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest .
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: YOUR_PROJECT_ID
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Push Docker image to Google Container Registry
+        run: docker push gcr.io/${{ secrets.GCE_PROJECT }}/your-project:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0.4.0
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: YOUR_PROJECT_ID
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Deploy to Google Compute Engine
+        run: |
+          gcloud compute ssh YOUR_INSTANCE_NAME --zone YOUR_INSTANCE_ZONE --command "
+          sudo docker pull gcr.io/YOUR_PROJECT_ID/your-project:latest &&
+          sudo docker stop your-project || true &&
+          sudo docker rm your-project || true &&
+          sudo docker run -d --name your-project -p 8080:8080 gcr.io/YOUR_PROJECT_ID/your-project:latest
+          "

@@ -30,6 +30,7 @@ cp .env.example .env
 ## [Optional] Docker-compose for mysql
 
 ✅ check environment at docker-compose.yml
+✅ check if your local port is occupied
 
 ```shell
 cd docker

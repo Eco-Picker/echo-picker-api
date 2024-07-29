@@ -1,1 +1,1 @@
-rootProject.name = "api"
+rootProject.name = "eco-picker-api"

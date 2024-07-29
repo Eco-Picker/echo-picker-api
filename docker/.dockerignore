@@ -1,0 +1,33 @@
+# Gradle, build files
+.gradle/
+build/tmp/
+build/reports/
+
+# Logging
+logs/
+*.log
+
+# Local environment
+.idea/
+docker/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IntelliJ IDEA config
+out/
+
+# Etc
+**/*.swp
+**/*.tmp
+**/*.bak
+*.class
+*.project
+*.classpath
+.github/
+docs/
+uploads/
