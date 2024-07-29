@@ -73,10 +73,4 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    doFirst {
-        val envVars = System.getenv()
-        for ((key, value) in envVars) {
-            println("$key: $value")
-        }
-    }
 }

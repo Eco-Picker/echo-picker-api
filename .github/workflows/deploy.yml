@@ -19,6 +19,16 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
 
+      - name: Debug Secrets
+        run: |
+          echo "DB_URL=${{ secrets.DB_URL }}"
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}"
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
+          echo "GEMINI_APP_KEY=${{ secrets.GEMINI_APP_KEY }}"
+          echo "GCE_PROJECT=${{ secrets.GCE_PROJECT }}"
+          echo "GCP_SA_KEY"=${{ secrets.GCP_SA_KEY }}
+
       - name: Build with Gradle
         env:
           DB_URL: ${{ secrets.DB_URL }}
