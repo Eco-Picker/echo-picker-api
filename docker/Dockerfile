@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jdk-jammy
 
 ENV JAVA_APP_DIR=/home/app \
     JAVA_OPTIONS="-Dfile.encoding=utf-8"
