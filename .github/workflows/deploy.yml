@@ -20,6 +20,12 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Gradle
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
         run: ./gradlew build
 
       - name: Build Docker image
