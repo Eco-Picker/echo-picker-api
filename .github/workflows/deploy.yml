@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew build
 
       - name: Build Docker image
-        run: docker build -t gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
+        run: docker build -f ./docker/Dockerfile -t gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v0.4.0
