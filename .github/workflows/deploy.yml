@@ -27,7 +27,7 @@ jobs:
           echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
           echo "GEMINI_APP_KEY=${{ secrets.GEMINI_APP_KEY }}"
           echo "GCE_PROJECT=${{ secrets.GCE_PROJECT }}"
-          echo "GCP_SA_KEY"=${{ secrets.GCP_SA_KEY }}
+          echo "GCP_SA_KEY=${{ secrets.GCP_SA_KEY }}"
 
       - name: Build with Gradle
         env:
@@ -49,11 +49,11 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          project_id: YOUR_PROJECT_ID
+          project_id: ${{ secrets.GCE_PROJECT }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
       - name: Push Docker image to Google Container Registry
-        run: docker push gcr.io/${{ secrets.GCE_PROJECT }}/your-project:latest
+        run: docker push gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -68,14 +68,14 @@ jobs:
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.0
         with:
-          project_id: YOUR_PROJECT_ID
+          project_id: ${{ secrets.GCE_PROJECT }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
       - name: Deploy to Google Compute Engine
         run: |
           gcloud compute ssh YOUR_INSTANCE_NAME --zone YOUR_INSTANCE_ZONE --command "
-          sudo docker pull gcr.io/YOUR_PROJECT_ID/your-project:latest &&
-          sudo docker stop your-project || true &&
-          sudo docker rm your-project || true &&
-          sudo docker run -d --name your-project -p 8080:8080 gcr.io/YOUR_PROJECT_ID/your-project:latest
+          sudo docker pull gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest &&
+          sudo docker stop eco-picker-api || true &&
+          sudo docker rm eco-picker-api || true &&
+          sudo docker run -d --name eco-picker-api -p 15000:15000 gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
           "
