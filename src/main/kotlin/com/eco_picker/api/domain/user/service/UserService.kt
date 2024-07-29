@@ -6,6 +6,7 @@ import com.eco_picker.api.domain.user.data.dto.UpdatePasswordResponse
 import org.springframework.stereotype.Service
 import io.github.oshai.kotlinlogging.KotlinLogging
 import com.eco_picker.api.domain.user.repository.UserRepository
+import com.eco_picker.api.domain.ranking.repository.RankingRepository
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.ZonedDateTime
@@ -13,6 +14,7 @@ import java.time.ZonedDateTime
 @Service
 class UserService (
     private val userRepository: UserRepository,
+    private val rankingRepository: RankingRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
     private val logger = KotlinLogging.logger { }
@@ -22,13 +24,15 @@ class UserService (
         return try {
             // EntityNotFoundException: Thrown when the user with the userId does not exist in the user DB
             val userEntity = userRepository.findById(userId).orElseThrow { EntityNotFoundException("User not found with id: $userId") }
+            val totalScore = rankingRepository.findTotalScoreByUserId(userId) ?: 0
             // IllegalStateException: Thrown when the user entity's ID is null
             val userid = userEntity.id ?: throw IllegalStateException("User ID should not be null")
             UserInfo(
                 id = userid,
                 username = userEntity.username,
                 email = userEntity.email,
-                onboardingStatus = userEntity.onboardingStatus
+                onboardingStatus = userEntity.onboardingStatus,
+                score = totalScore
             )
         // Any other exceptions
         } catch (e: Exception) {

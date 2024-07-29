@@ -12,4 +12,7 @@ interface RankingRepository : JpaRepository<RankingEntity, Long> {
         @Param("period") period: String,
         pageable: org.springframework.data.domain.Pageable
     ): List<RankingEntity>
+
+    @Query("SELECT SUM(r.score) FROM RankingEntity r WHERE r.userId = :userId")
+    fun findTotalScoreByUserId(@Param("userId") userId: Long): Int?
 }
