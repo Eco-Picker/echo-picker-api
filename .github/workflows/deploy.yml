@@ -41,15 +41,14 @@ jobs:
         run: docker build -f ./docker/Dockerfile -t gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest .
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0.4.0
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCE_SA_KEY_BASE64 }}
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ secrets.GCE_PROJECT }}
-          service_account_key: ${{ secrets.GCE_SA_KEY_BASE64 }}
+          version: '>= 363.0.0'
 
       - name: Push Docker image to Google Container Registry
         run: docker push gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
@@ -71,7 +70,7 @@ jobs:
 
       - name: Deploy to Google Compute Engine
         run: |
-          gcloud compute ssh YOUR_INSTANCE_NAME --zone YOUR_INSTANCE_ZONE --command "
+          gcloud compute ssh ${{ secrets.GCE_INSTANCE_NAME }} --zone ${{ secrets.GCE_INSTANCE_ZONE }} --command "
           sudo docker pull gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest &&
           sudo docker stop eco-picker-api || true &&
           sudo docker rm eco-picker-api || true &&
