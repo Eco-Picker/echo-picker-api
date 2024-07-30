@@ -14,7 +14,6 @@ class GeminiManager {
             title = "",
             content = "",
             category = NewsletterCategory.NEWS,
-            author = null,
             publishedAt = ZonedDateTime.now(),
             source = ""
         )

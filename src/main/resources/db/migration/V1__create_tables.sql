@@ -70,10 +70,10 @@ CREATE TABLE ranking (
 CREATE TABLE newsletter_event (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    content TEXT,
-    source VARCHAR(255),
-    event_date TIMESTAMP,
-    expiration_date TIMESTAMP,
+    content TEXT NOT NULL,
+    source VARCHAR(255) NOT NULL,
+    start_at TIMESTAMP,
+    end_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL
 );
@@ -82,9 +82,9 @@ CREATE TABLE newsletter_event (
 CREATE TABLE newsletter_education (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    content TEXT,
-    source VARCHAR(255),
-    published_at TIMESTAMP,
+    content TEXT NOT NULL,
+    source VARCHAR(255) NOT NULL,
+    published_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL
 );
@@ -93,9 +93,9 @@ CREATE TABLE newsletter_education (
 CREATE TABLE newsletter_news (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    content TEXT,
-    source VARCHAR(255),
-    published_at TIMESTAMP,
+    content TEXT NOT NULL,
+    source VARCHAR(255) NOT NULL,
+    published_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL
 );

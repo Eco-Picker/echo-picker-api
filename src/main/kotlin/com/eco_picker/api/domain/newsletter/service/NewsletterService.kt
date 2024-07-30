@@ -5,19 +5,35 @@ import com.eco_picker.api.domain.newsletter.data.Newsletter
 import com.eco_picker.api.domain.newsletter.data.NewsletterSummary
 import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterRequest
 import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterSummariesRequest
+import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterSummariesResponse
+import com.eco_picker.api.domain.newsletter.repository.EducationalContentRepository
+import com.eco_picker.api.domain.newsletter.repository.EventRepository
+import com.eco_picker.api.domain.newsletter.repository.NewsRepository
 import com.eco_picker.api.global.support.GeminiManager
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import java.time.ZonedDateTime
+import kotlin.jvm.optionals.getOrDefault
+
 
 @Service
-class NewsletterService(private val geminiManager: GeminiManager) {
+class NewsletterService(
+    private val geminiManager: GeminiManager,
+    private val educationalContentRepository: EducationalContentRepository,
+    private val eventRepository: EventRepository,
+    private val newsRepository: NewsRepository
+) {
+    private val logger = KotlinLogging.logger { }
+
     private fun generateNewsletter(category: NewsletterCategory): Boolean {
         val newsletter = this.geminiManager.generateNewsletter(category = category)
-        // @todo save to dv
         return true
     }
 
     fun getRandomNewsletterSummary(): NewsletterSummary {
+        // @todo 이게 필요한가..
         return NewsletterSummary(
             id = 1L,
             title = "The Importance of Recycling",
@@ -26,124 +42,135 @@ class NewsletterService(private val geminiManager: GeminiManager) {
         )
     }
 
-    fun getNewsletterSummaries(params: GetNewsletterSummariesRequest): List<NewsletterSummary> {
-        return when (params.category!!) {
-            NewsletterCategory.NEWS -> {
-                this.getNewsSummaries(limit = params.limit, offset = params.offset)
+    fun getNewsletterSummaries(params: GetNewsletterSummariesRequest): GetNewsletterSummariesResponse {
+        try {
+            val pageable = PageRequest.of(params.offset, params.limit, Sort.by(Sort.Direction.DESC, "id"))
+            val response = when (params.category!!) {
+                NewsletterCategory.NEWS -> {
+                    this.getNewsSummaries(pageable = pageable)
+                }
+
+                NewsletterCategory.EVENT -> {
+                    this.getEventSummaries(pageable = pageable)
+                }
+
+                NewsletterCategory.EDUCATION -> {
+                    this.getEducationalContentSummaries(pageable = pageable)
+                }
             }
 
-            NewsletterCategory.EVENT -> {
-                this.getEventSummaries(limit = params.limit, offset = params.offset)
+            return response.apply {
+                result = true
             }
-
-            NewsletterCategory.EDUCATION -> {
-                this.getEducationalContentSummaries(limit = params.limit, offset = params.offset)
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to get newsletter summaries" }
+            return GetNewsletterSummariesResponse().apply {
+                message = e.message
             }
         }
     }
 
-    fun getNewsletter(params: GetNewsletterRequest): Newsletter {
+    fun getNewsletter(params: GetNewsletterRequest): Newsletter? {
         val (id, category) = params
         return when (category!!) {
-            NewsletterCategory.NEWS -> {
-                this.getNews(id)
-            }
-
-            NewsletterCategory.EVENT -> {
-                this.getEvent(id)
-            }
-
-            NewsletterCategory.EDUCATION -> {
-                this.getEducationalContent(id)
-            }
+            NewsletterCategory.NEWS -> this.getNews(id)
+            NewsletterCategory.EVENT -> this.getEvent(id)
+            NewsletterCategory.EDUCATION -> this.getEducationalContent(id)
         }
     }
 
-    private fun getEducationalContentSummaries(offset: Int, limit: Int): List<NewsletterSummary> {
-        return listOf(
-            NewsletterSummary(
-                id = 1L,
-                title = "The Importance of Recycling",
-                summary = "Learn why recycling is crucial for reducing waste and conserving resources. This guide covers the benefits of recycling and how to properly sort materials.",
+    private fun getEducationalContentSummaries(pageable: Pageable): GetNewsletterSummariesResponse {
+        val pages = educationalContentRepository.findAll(pageable)
+
+        return GetNewsletterSummariesResponse(
+            currentPage = pages.number,
+            totalItems = pages.totalElements,
+            totalPages = pages.totalPages,
+            newsletterSummaryList = pages.content.map {
+                NewsletterSummary(
+                    id = it.id!!,
+                    title = it.title,
+                    summary = it.content,
+                    category = NewsletterCategory.EDUCATION,
+                )
+            }
+        )
+    }
+
+    private fun getNewsSummaries(pageable: Pageable): GetNewsletterSummariesResponse {
+        val pages = newsRepository.findAll(pageable)
+
+        return GetNewsletterSummariesResponse(
+            currentPage = pages.number,
+            totalItems = pages.totalElements,
+            totalPages = pages.totalPages,
+            newsletterSummaryList = pages.content.map {
+                NewsletterSummary(
+                    id = it.id!!,
+                    title = it.title,
+                    summary = it.content,
+                    category = NewsletterCategory.NEWS,
+                )
+            }
+        )
+    }
+
+    private fun getEventSummaries(pageable: Pageable): GetNewsletterSummariesResponse {
+        val pages = eventRepository.findAll(pageable)
+
+        return GetNewsletterSummariesResponse(
+            currentPage = pages.number,
+            totalItems = pages.totalElements,
+            totalPages = pages.totalPages,
+            newsletterSummaryList = pages.content.map {
+                NewsletterSummary(
+                    id = it.id!!,
+                    title = it.title,
+                    summary = it.content,
+                    category = NewsletterCategory.EVENT,
+                )
+            }
+        )
+    }
+
+    private fun getEducationalContent(id: Long): Newsletter? {
+        return educationalContentRepository.findById(id).map {
+            Newsletter(
+                id = it.id!!,
+                title = it.title,
+                content = it.content,
                 category = NewsletterCategory.EDUCATION,
-            ),
-            NewsletterSummary(
-                id = 2L,
-                title = "How to Reduce Plastic Waste",
-                summary = "Discover practical tips for minimizing plastic use in your daily life. This article provides strategies for reducing plastic waste and opting for sustainable alternatives.",
-                category = NewsletterCategory.EDUCATION,
+                source = it.source,
+                publishedAt = it.publishedAt,
             )
-        )
+        }.getOrDefault(null)
     }
 
-    private fun getNewsSummaries(offset: Int, limit: Int): List<NewsletterSummary> {
-        return listOf(
-            NewsletterSummary(
-                id = 3L,
-                title = "New Waste Sorting Regulations Announced",
-                summary = "Local authorities have introduced new regulations for waste sorting to improve recycling rates. Learn about the changes and how they will impact your recycling efforts.",
+    private fun getNews(id: Long): Newsletter? {
+        return newsRepository.findById(id).map {
+            Newsletter(
+                id = it.id!!,
+                title = it.title,
+                content = it.content,
                 category = NewsletterCategory.NEWS,
-            ),
-            NewsletterSummary(
-                id = 4L,
-                title = "Plastic Waste Reduction Goals Met",
-                summary = "A recent report shows that the city has met its plastic waste reduction goals ahead of schedule. Find out how these achievements were accomplished and what comes next.",
-                category = NewsletterCategory.NEWS,
+                source = it.source,
+                publishedAt = it.publishedAt,
             )
-        )
+        }.getOrDefault(null)
     }
 
-    private fun getEventSummaries(offset: Int, limit: Int): List<NewsletterSummary> {
-        return listOf(
-            NewsletterSummary(
-                id = 5L,
-                title = "Community Clean-Up Day",
-                summary = "Join us for a community clean-up day to help collect litter and beautify our local parks. Volunteers will meet at the central park entrance at 9 AM.",
+    private fun getEvent(id: Long): Newsletter? {
+        return eventRepository.findById(id).map {
+            Newsletter(
+                id = it.id!!,
+                title = it.title,
+                content = it.content,
                 category = NewsletterCategory.EVENT,
-            ),
-            NewsletterSummary(
-                id = 6L,
-                title = "Recycling Workshop: Best Practices",
-                summary = "Attend our workshop to learn the best practices for effective recycling. The workshop will cover how to sort waste correctly and reduce contamination in recycling bins.",
-                category = NewsletterCategory.EVENT,
+                source = it.source,
+                startAt = it.startAt,
+                endAt = it.endAt
             )
-        )
-    }
-
-    private fun getEducationalContent(id: Long): Newsletter {
-        return Newsletter(
-            id = 1L,
-            title = "The Importance of Recycling",
-            content = "Learn why recycling is crucial for reducing waste and conserving resources. This guide covers the benefits of recycling and how to properly sort materials.",
-            category = NewsletterCategory.EDUCATION,
-            author = "Emily Green",
-            publishedAt = ZonedDateTime.now(),
-            source = "Eco News"
-        )
-    }
-
-    private fun getNews(id: Long): Newsletter {
-        return Newsletter(
-            id = 3L,
-            title = "New Waste Sorting Regulations Announced",
-            content = "Local authorities have introduced new regulations for waste sorting to improve recycling rates. Learn about the changes and how they will impact your recycling efforts.",
-            category = NewsletterCategory.NEWS,
-            author = "Sarah White",
-            publishedAt = ZonedDateTime.now(),
-            source = "City News"
-        )
-    }
-
-    private fun getEvent(id: Long): Newsletter {
-        return Newsletter(
-            id = 5L,
-            title = "Community Clean-Up Day",
-            content = "Join us for a community clean-up day to help collect litter and beautify our local parks. Volunteers will meet at the central park entrance at 9 AM.",
-            category = NewsletterCategory.EVENT,
-            author = "Cleanup Organizer",
-            publishedAt = ZonedDateTime.now(),
-            source = "Local Events"
-        )
+        }.getOrDefault(null)
     }
 
 }

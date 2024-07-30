@@ -21,11 +21,11 @@ data class Newsletter(
     val source: String,
 
     @field:Schema(description = "published datetime")
-    val publishedAt: ZonedDateTime = ZonedDateTime.now(),
+    val publishedAt: ZonedDateTime? = null,
 
-    @field:Schema(description = "author", nullable = true)
-    val author: String? = null,
+    @field:Schema(description = "start datetime")
+    val startAt: ZonedDateTime? = null,
 
-    @field:Schema(description = "expired datetime", nullable = true)
-    val expiredAt: ZonedDateTime? = null,
+    @field:Schema(description = "end datetime")
+    val endAt: ZonedDateTime? = null,
 )

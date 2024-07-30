@@ -38,13 +38,9 @@ class NewsletterController(private val newsletterService: NewsletterService) {
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestBody getNewsletterSummariesRequest: GetNewsletterSummariesRequest,
     ): GetNewsletterSummariesResponse {
-        val newsletterSummaries =
-            this.newsletterService.getNewsletterSummaries(params = getNewsletterSummariesRequest)
-        return GetNewsletterSummariesResponse(newsletterSummaryList = newsletterSummaries).apply {
-            result = true
-        }
+        return this.newsletterService.getNewsletterSummaries(params = getNewsletterSummariesRequest)
     }
-
+    
     @Operation(
         tags = [OperationTag.NEWSLETTER],
         security = [SecurityRequirement(name = JWT)],

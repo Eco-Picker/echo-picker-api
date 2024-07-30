@@ -2,7 +2,6 @@ package com.eco_picker.api.domain.newsletter.data
 
 import com.eco_picker.api.domain.newsletter.constant.NewsletterCategory
 import io.swagger.v3.oas.annotations.media.Schema
-import java.time.ZonedDateTime
 
 data class NewsletterSummary(
     @field:Schema(description = "newsletter ID (PK)")
@@ -15,8 +14,5 @@ data class NewsletterSummary(
     val summary: String,
 
     @field:Schema(description = "category")
-    val category: NewsletterCategory,
-
-    @field:Schema(description = "published datetime")
-    val publishedAt: ZonedDateTime = ZonedDateTime.now(),
+    val category: NewsletterCategory
 )
