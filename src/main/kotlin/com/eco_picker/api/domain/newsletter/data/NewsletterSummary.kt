@@ -4,7 +4,7 @@ import com.eco_picker.api.domain.newsletter.constant.NewsletterCategory
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.ZonedDateTime
 
-data class NewsletterListItem(
+data class NewsletterSummary(
     @field:Schema(description = "newsletter ID (PK)")
     val id: Long,
 
