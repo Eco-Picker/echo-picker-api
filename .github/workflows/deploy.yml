@@ -10,23 +10,13 @@ jobs:
     environment: production
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'adopt'
-
-      - name: Debug Secrets
-        run: |
-          echo "DB_URL=${{ secrets.DB_URL }}"
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}"
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}"
-          echo "GEMINI_APP_KEY=${{ secrets.GEMINI_APP_KEY }}"
-          echo "GCE_PROJECT=${{ secrets.GCE_PROJECT }}"
-          echo "GCE_SA_KEY_BASE64=${{ secrets.GCE_SA_KEY_BASE64 }}"
+          distribution: 'temurin'
 
       - name: Build with Gradle
         env:
@@ -37,42 +27,41 @@ jobs:
           GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
         run: ./gradlew build
 
-      - name: Build Docker image
-        run: docker build -f ./docker/Dockerfile -t gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest .
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          credentials_json: ${{ secrets.GCE_SA_KEY_BASE64 }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
         with:
-          version: '>= 363.0.0'
-
-      - name: Push Docker image to Google Container Registry
-        run: docker push gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/eco-picker-api:latest
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
     steps:
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0.4.0
+        uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: ${{ secrets.GCE_SA_KEY_BASE64 }}
+          credentials_json: '${{ secrets.GCE_SA_KEY_BASE64 }}'
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
-        with:
-          version: '>= 363.0.0'
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v1'
 
       - name: Deploy to Google Compute Engine
+        env:
+          GCE_INSTANCE_NAME: ${{ secrets.GCE_INSTANCE_NAME }}
+          GCE_INSTANCE_ZONE: ${{ secrets.GCE_INSTANCE_ZONE }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          gcloud compute ssh ${{ secrets.GCE_INSTANCE_NAME }} --zone ${{ secrets.GCE_INSTANCE_ZONE }} --command "
-          sudo docker pull gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest &&
-          sudo docker stop eco-picker-api || true &&
-          sudo docker rm eco-picker-api || true &&
-          sudo docker run -d --name eco-picker-api -p 15000:15000 gcr.io/${{ secrets.GCE_PROJECT }}/eco-picker-api:latest
+          gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
+          docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest &&
+          docker stop eco-picker-api || true &&
+          docker rm eco-picker-api || true &&
+          docker run -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
           "
