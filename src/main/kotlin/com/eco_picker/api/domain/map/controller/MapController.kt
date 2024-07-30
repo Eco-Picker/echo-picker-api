@@ -1,7 +1,7 @@
 package com.eco_picker.api.domain.map.controller
 
-import com.eco_picker.api.domain.map.data.dto.GetMyLocationDetailResponse
-import com.eco_picker.api.domain.map.data.dto.GetMyLocationsResponse
+import com.eco_picker.api.domain.map.data.dto.GetMyGarbageLocationDetailResponse
+import com.eco_picker.api.domain.map.data.dto.GetMyGarbageLocationsResponse
 import com.eco_picker.api.domain.map.service.MapService
 import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
@@ -19,12 +19,12 @@ class MapController(private val mapService: MapService) {
     @Operation(
         tags = [OperationTag.MAP],
         security = [SecurityRequirement(name = JWT)],
-        summary = "Get My locations",
+        summary = "Get My Garbage locations",
     )
     @GetMapping("/maps")
-    fun getMyLocations(@AuthenticationPrincipal principal: UserPrincipal): GetMyLocationsResponse {
-        val locations = this.mapService.getMyLocations(principal.id)
-        return GetMyLocationsResponse(locations = locations).apply {
+    fun getMyGarbageLocations(@AuthenticationPrincipal principal: UserPrincipal): GetMyGarbageLocationsResponse {
+        val locations = this.mapService.getMyGarbageLocations(userId = principal.id)
+        return GetMyGarbageLocationsResponse(garbageLocations = locations).apply {
             result = true
         }
     }
@@ -32,16 +32,16 @@ class MapController(private val mapService: MapService) {
     @Operation(
         tags = [OperationTag.MAP],
         security = [SecurityRequirement(name = JWT)],
-        summary = "Get My specific location",
+        summary = "Get My Specific Garbage Location",
     )
-    @GetMapping("/maps/{id}")
-    fun getMyLocation(
+    @GetMapping("/maps/{garbageId}")
+    fun getMyGarbageLocation(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @Parameter(description = "location ID")
-        @PathVariable id: Long
-    ): GetMyLocationDetailResponse {
-        val locationDetail = this.mapService.getMyLocation(principal.id, id)
-        return GetMyLocationDetailResponse(locationDetail = locationDetail).apply {
+        @Parameter(description = "garbage ID (PK)")
+        @PathVariable garbageId: Long
+    ): GetMyGarbageLocationDetailResponse {
+        val locationDetail = this.mapService.getMyGarbageLocation(userId = principal.id, garbageId = garbageId)
+        return GetMyGarbageLocationDetailResponse(garbageLocationDetail = locationDetail).apply {
             result = true
         }
     }

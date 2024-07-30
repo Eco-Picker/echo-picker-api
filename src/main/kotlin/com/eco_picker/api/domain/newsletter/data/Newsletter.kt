@@ -5,19 +5,19 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.ZonedDateTime
 
 data class Newsletter(
-    @field:Schema(description = "newsletter ID (PK)")
+    @field:Schema(description = "newsletter ID (PK)", required = true)
     val id: Long,
 
-    @field:Schema(description = "title")
+    @field:Schema(description = "title", required = true)
     val title: String,
 
-    @field:Schema(description = "content")
+    @field:Schema(description = "content", required = true)
     val content: String,
 
-    @field:Schema(description = "category")
+    @field:Schema(description = "category", required = true)
     val category: NewsletterCategory,
 
-    @field:Schema(description = "source")
+    @field:Schema(description = "source", required = true)
     val source: String,
 
     @field:Schema(description = "published datetime")

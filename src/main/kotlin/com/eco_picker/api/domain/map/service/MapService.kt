@@ -2,31 +2,32 @@ package com.eco_picker.api.domain.map.service
 
 import com.eco_picker.api.domain.garbage.constant.GarbageCategory
 import com.eco_picker.api.domain.garbage.data.Garbage
-import com.eco_picker.api.domain.map.data.Location
-import com.eco_picker.api.domain.map.data.LocationDetail
+import com.eco_picker.api.domain.map.data.GarbageLocation
+import com.eco_picker.api.domain.map.data.GarbageLocationDetail
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
 
 @Service
 class MapService {
-    fun getMyLocations(userId: Long): List<Location> {
+    fun getMyGarbageLocations(userId: Long): List<GarbageLocation> {
         return listOf(
-            Location(
-                id = 1L,
+            GarbageLocation(
+                garbageId = 1L,
+                garbageCategory = GarbageCategory.GLASS,
                 longitude = "",
                 latitude = ""
             ),
-            Location(
-                id = 2L,
+            GarbageLocation(
+                garbageId = 2L,
+                garbageCategory = GarbageCategory.GLASS,
                 longitude = "",
                 latitude = ""
             )
         )
     }
 
-    fun getMyLocation(userId: Long, id: Long): LocationDetail? {
-        return LocationDetail(
-            id = 1L,
+    fun getMyGarbageLocation(userId: Long, garbageId: Long): GarbageLocationDetail? {
+        return GarbageLocationDetail(
             longitude = "",
             latitude = "",
             garbage = Garbage(

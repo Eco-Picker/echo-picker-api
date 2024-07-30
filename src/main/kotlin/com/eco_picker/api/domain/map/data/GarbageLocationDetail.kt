@@ -3,10 +3,7 @@ package com.eco_picker.api.domain.map.data
 import com.eco_picker.api.domain.garbage.data.Garbage
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class LocationDetail(
-    @field:Schema(description = "id")
-    val id: Long,
-
+data class GarbageLocationDetail(
     @field:Schema(description = "garbage Info")
     val garbage: Garbage?,
 
