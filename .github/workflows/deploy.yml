@@ -59,9 +59,19 @@ jobs:
           GCE_INSTANCE_ZONE: ${{ secrets.GCE_INSTANCE_ZONE }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
-          docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest &&
-          docker stop eco-picker-api || true &&
-          docker rm eco-picker-api || true &&
-          docker run -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
+          gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --oslogin=true --command "
+          if ! command -v docker &> /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\"
+            sudo apt-get update
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+            sudo usermod -aG docker \$USER
+          fi
+
+          sudo docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
+          sudo docker stop eco-picker-api || true
+          sudo docker rm eco-picker-api || true
+          sudo docker run -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
           "
