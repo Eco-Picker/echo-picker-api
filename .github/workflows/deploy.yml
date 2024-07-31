@@ -59,7 +59,7 @@ jobs:
           GCE_INSTANCE_ZONE: ${{ secrets.GCE_INSTANCE_ZONE }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
-          gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --oslogin=true --command "
+          gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
           if ! command -v docker &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
