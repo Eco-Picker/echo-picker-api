@@ -87,7 +87,7 @@ jobs:
           
           sudo docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
           sudo docker stop eco-picker-api || true
-          sudo docker rm eco-picker-api || true
+          sudo docker rm -f eco-picker-api || true
           sudo docker run --env-file .env --network host -d --name eco-picker-api $DOCKERHUB_USERNAME/eco-picker-api:latest
           
           # Clean up the environment file
