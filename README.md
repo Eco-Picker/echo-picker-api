@@ -47,6 +47,9 @@ docker-compose up -d
 
 http://localhost:15000/swagger-ui/index.html
 
+### Health Check 
+http://localhost:15000/actuator/health
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
