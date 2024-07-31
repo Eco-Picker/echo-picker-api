@@ -78,17 +78,17 @@ jobs:
           
           # Create an environment file
           cat << EOF > .env
-          DB_URL='$DB_URL'
-          DB_USERNAME='$DB_USERNAME'
-          DB_PASSWORD='$DB_PASSWORD'
-          SMTP_PASSWORD='$SMTP_PASSWORD'
-          GEMINI_APP_KEY='$GEMINI_APP_KEY'
+          DB_URL=$DB_URL
+          DB_USERNAME=$DB_USERNAME
+          DB_PASSWORD=$DB_PASSWORD
+          SMTP_PASSWORD=$SMTP_PASSWORD
+          GEMINI_APP_KEY=$GEMINI_APP_KEY
           EOF
           
           sudo docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
           sudo docker stop eco-picker-api || true
           sudo docker rm eco-picker-api || true
-          sudo docker run --env-file .env --network host -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
+          sudo docker run --env-file .env --network host -d --name eco-picker-api $DOCKERHUB_USERNAME/eco-picker-api:latest
           
           # Clean up the environment file
           # rm .env
