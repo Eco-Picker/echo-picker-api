@@ -64,6 +64,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
+          USER: "runner"
         run: |
           gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
           if ! command -v docker &> /dev/null; then
