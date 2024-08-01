@@ -7,5 +7,7 @@ class UpdatePasswordResponse : BaseResponse<UpdatePasswordResponse.Code>() {
         INVALID_PASSWORD,
         NEW_PASSWORD_IS_SAME_AS_CURRENT_PASSWORD,
         NOT_MATCHED_NEW_PASSWORDS,
+        USER_NOT_FOUND,
+        INTERNAL_SERVER_ERROR
     }
 }

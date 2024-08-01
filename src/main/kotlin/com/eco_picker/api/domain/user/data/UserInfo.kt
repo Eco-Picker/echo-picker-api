@@ -15,8 +15,5 @@ data class UserInfo(
     val email: String,
 
     @field:Schema(description = "onboarding status", required = true, defaultValue = "BEGIN", example = "BEGIN")
-    val onboardingStatus: OnboardingStatus = OnboardingStatus.BEGIN,
-
-    @field:Schema(description = "score", required = true)
-    val score: Int
+    val onboardingStatus: OnboardingStatus = OnboardingStatus.BEGIN
 )

@@ -3,6 +3,7 @@ package com.eco_picker.api.domain.user.controller
 import com.eco_picker.api.domain.user.data.dto.UpdatePasswordRequest
 import com.eco_picker.api.domain.user.data.dto.UpdatePasswordResponse
 import com.eco_picker.api.domain.user.data.dto.UserInfoResponse
+import com.eco_picker.api.domain.user.data.dto.UserStatisticsResponse
 import com.eco_picker.api.domain.user.service.UserService
 import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
@@ -40,5 +41,15 @@ class UserController(private val userService: UserService) {
         @RequestBody updatePasswordRequest: UpdatePasswordRequest
     ): UpdatePasswordResponse {
         return userService.updatePassword(userId = principal.id, params = updatePasswordRequest)
+    }
+
+    @Operation(
+        tags = [OperationTag.USER],
+        security = [SecurityRequirement(name = JWT)],
+        summary = "Get user statistics",
+    )
+    @GetMapping("statistics")
+    fun getStatistics(@AuthenticationPrincipal principal: UserPrincipal): UserStatisticsResponse {
+        return userService.getStatistics(userId = principal.id)
     }
 }
