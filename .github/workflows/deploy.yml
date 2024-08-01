@@ -87,6 +87,6 @@ jobs:
           docker run --env-file /tmp/.env -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
           
           # Clean up the environment file
-          rm /tmp/.env
+          # rm /tmp/.env
           EOF
           "
