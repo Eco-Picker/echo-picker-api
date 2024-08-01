@@ -60,6 +60,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
+          PROFILE: ${{ vars.PROFILE }}
         run: |
           gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
           sudo bash << EOF
@@ -79,6 +80,7 @@ jobs:
           DB_PASSWORD=$DB_PASSWORD
           SMTP_PASSWORD=$SMTP_PASSWORD
           GEMINI_APP_KEY=$GEMINI_APP_KEY
+          PROFILE=$PROFILE
           EOT
           
           docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
