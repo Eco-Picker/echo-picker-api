@@ -50,10 +50,6 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCE_SA_KEY_BASE64 }}'
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v1'
-
       - name: Deploy to Google Compute Engine
         env:
           GCE_INSTANCE_NAME: ${{ secrets.GCE_INSTANCE_NAME }}
@@ -64,21 +60,21 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
-          USER: "runner"
         run: |
           gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
+          sudo -i  # Switch to root to avoid permission issues
+          
           if ! command -v docker &> /dev/null; then
-            sudo apt-get update
-            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\"
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-            sudo usermod -aG docker \$USER
+            apt-get update
+            apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+            add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable\"
+            apt-get update
+            apt-get install -y docker-ce docker-ce-cli containerd.io
           fi
           
           # Create an environment file
-          cat << EOF > .env
+          cat << EOF > /root/.env
           DB_URL=$DB_URL
           DB_USERNAME=$DB_USERNAME
           DB_PASSWORD=$DB_PASSWORD
@@ -86,11 +82,11 @@ jobs:
           GEMINI_APP_KEY=$GEMINI_APP_KEY
           EOF
           
-          sudo docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
-          sudo docker stop eco-picker-api || true
-          sudo docker rm -f eco-picker-api || true
-          sudo docker run --env-file .env -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
+          docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
+          docker stop eco-picker-api || true
+          docker rm -f eco-picker-api || true
+          docker run --env-file /root/.env -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
           
           # Clean up the environment file
-          # rm .env
+          rm /root/.env
           "
