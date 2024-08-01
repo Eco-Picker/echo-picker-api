@@ -62,8 +62,7 @@ jobs:
           GEMINI_APP_KEY: ${{ secrets.GEMINI_APP_KEY }}
         run: |
           gcloud compute ssh $GCE_INSTANCE_NAME --zone $GCE_INSTANCE_ZONE --command "
-          sudo -i  # Switch to root to avoid permission issues
-          
+          sudo bash << EOF
           if ! command -v docker &> /dev/null; then
             apt-get update
             apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -74,19 +73,20 @@ jobs:
           fi
           
           # Create an environment file
-          cat << EOF > /root/.env
+          cat << EOT > /tmp/.env
           DB_URL=$DB_URL
           DB_USERNAME=$DB_USERNAME
           DB_PASSWORD=$DB_PASSWORD
           SMTP_PASSWORD=$SMTP_PASSWORD
           GEMINI_APP_KEY=$GEMINI_APP_KEY
-          EOF
+          EOT
           
           docker pull $DOCKERHUB_USERNAME/eco-picker-api:latest
           docker stop eco-picker-api || true
           docker rm -f eco-picker-api || true
-          docker run --env-file /root/.env -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
+          docker run --env-file /tmp/.env -d --name eco-picker-api -p 15000:15000 $DOCKERHUB_USERNAME/eco-picker-api:latest
           
           # Clean up the environment file
-          rm /root/.env
+          rm /tmp/.env
+          EOF
           "
