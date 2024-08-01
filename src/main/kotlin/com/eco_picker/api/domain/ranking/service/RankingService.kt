@@ -1,81 +1,138 @@
 package com.eco_picker.api.domain.ranking.service
 
-import com.eco_picker.api.domain.ranking.constant.RankingPeriod
+import com.eco_picker.api.domain.garbage.repository.GarbageMonthlyRepository
+import com.eco_picker.api.domain.garbage.data.entity.GarbageMonthlyEntity
+import com.eco_picker.api.domain.ranking.data.GeneralRanking
 import com.eco_picker.api.domain.ranking.data.Ranker
-import com.eco_picker.api.domain.ranking.data.Ranking
-import com.eco_picker.api.domain.ranking.repository.RankingRepository
+import com.eco_picker.api.domain.ranking.data.GeneralRanker
+import com.eco_picker.api.domain.ranking.data.dto.RankerStatisticsResponse
 import org.springframework.stereotype.Service
 import org.springframework.data.domain.PageRequest
 import com.eco_picker.api.domain.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.persistence.EntityNotFoundException
 
+
 @Service
 class RankingService (
-    private val rankingRepository: RankingRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val garbageMonthlyRepository: GarbageMonthlyRepository
 ) {
     private val logger = KotlinLogging.logger { }
 
-    fun getDailyRanking(userId: Long, offset: Int, limit: Int): Ranking {
-        return this.getRanking(userId, RankingPeriod.DAILY, offset, limit)
-    }
+    private val garbageScoreTable = mapOf(
+        "plastic" to 1,
+        "metal" to 2,
+        "glass" to 3,
+        "cardboard_paper" to 4,
+        "food_scraps" to 5,
+        "organic_yard_waste" to 6,
+        "other" to 7
+    )
 
-    fun getWeeklyRanking(userId: Long, offset: Int, limit: Int): Ranking {
-        return this.getRanking(userId, RankingPeriod.WEEKLY, offset, limit)
-    }
-
-    fun getMonthlyRanking(userId: Long, offset: Int, limit: Int): Ranking {
-        return this.getRanking(userId, RankingPeriod.MONTHLY, offset, limit)
-    }
-
-    fun getRankerDetail(rankingId: Long): Ranker {
+    fun getRanking(offset: Int, limit: Int): GeneralRanking {
         return try {
-            val rankingEntity = rankingRepository.findById(rankingId).orElseThrow { EntityNotFoundException("Ranker not found with rankingId: $rankingId") }
-            val userEntity = userRepository.findById(rankingEntity.userId.toLong()).orElseThrow { EntityNotFoundException("User not found with id: ${rankingEntity.userId}") }
-            Ranker(id = rankingEntity.userId.toLong(), username = userEntity.username, point = rankingEntity.score)
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to get ranker detail for rankingId: $rankingId" }
-            throw e
-        }
-    }
-
-    private fun getRanking(userId: Long, period: RankingPeriod, offset: Int, limit: Int): Ranking {
-        return try {
-            val periodString = period.name.lowercase()
             val pageable = PageRequest.of(offset, limit)
-            val results = rankingRepository.findTopRankersByPeriod(periodString, pageable)
+            val users = userRepository.findAll(pageable)
 
-            val rankers = results.map {
-                val userEntity = userRepository.findById(it.userId.toLong()).orElseThrow { EntityNotFoundException("User not found with id: ${it.userId}") }
-                Ranker(id = it.userId.toLong(), username = userEntity.username, point = it.score)
-            }
-            Ranking(rankers = rankers)
+            val rankers = users.mapNotNull { user ->
+                val userId = user.id ?: return@mapNotNull null // Skip users with null IDs
+                val monthlyData = garbageMonthlyRepository.findByUserId(userId)
+                val totalScore = calculateTotalScore(monthlyData)
+
+                GeneralRanker(
+                    id = userId,
+                    username = user.username,
+                    point = totalScore
+                )
+            }.sortedByDescending { it.point }
+
+            GeneralRanking(rankers = rankers)
         } catch (e: Exception) {
-            logger.error(e) { "Failed to get ranking for period: $period, userId: $userId, offset: $offset, limit: $limit" }
+            logger.error(e) { "Failed to get ranking with offset: $offset, limit: $limit" }
             throw e
         }
+    }
+
+    fun getRankerDetail(userId: Long): Ranker {
+        return try {
+            val userEntity = userRepository.findById(userId).orElseThrow { EntityNotFoundException("User not found with id: $userId") }
+            val rankerStatistics = getRankerStatistics(userId)
+
+            Ranker(
+                id = userEntity.id,
+                username = userEntity.username,
+                rankerStatistics = rankerStatistics
+            )
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to get ranker detail for userId: $userId" }
+            throw e
+        }
+    }
+
+    private fun getRankerStatistics(userId: Long): RankerStatisticsResponse.RankerStatistics {
+        val monthlyData = garbageMonthlyRepository.findByUserId(userId)
+        val totalCount = monthlyData.sumOf {
+            it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.organicYardWaste + it.other
+        }
+
+        val totalCardboardPaper = monthlyData.sumOf { it.cardboardPaper }
+        val totalPlastic = monthlyData.sumOf { it.plastic }
+        val totalGlass = monthlyData.sumOf { it.glass }
+        val totalOther = monthlyData.sumOf { it.other }
+        val totalMetal = monthlyData.sumOf { it.metal }
+        val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
+        val totalOrganicYardWaste = monthlyData.sumOf { it.organicYardWaste }
+
+        val cardboardPaperScore = totalCardboardPaper * garbageScoreTable["cardboard_paper"]!!
+        val plasticScore = totalPlastic * garbageScoreTable["plastic"]!!
+        val glassScore = totalGlass * garbageScoreTable["glass"]!!
+        val otherScore = totalOther * garbageScoreTable["other"]!!
+        val metalScore = totalMetal * garbageScoreTable["metal"]!!
+        val foodScrapsScore = totalFoodScraps * garbageScoreTable["food_scraps"]!!
+        val organicYardWasteScore = totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
+
+        val totalScore = cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore + organicYardWasteScore
+
+        return RankerStatisticsResponse.RankerStatistics(
+            count = RankerStatisticsResponse.Count(
+                totalCount = totalCount,
+                totalCardboardPaper = totalCardboardPaper,
+                totalPlastic = totalPlastic,
+                totalGlass = totalGlass,
+                totalOther = totalOther,
+                totalMetal = totalMetal,
+                totalFoodScraps = totalFoodScraps,
+                totalOrganicYardWaste = totalOrganicYardWaste
+            ),
+            score = RankerStatisticsResponse.Score(
+                totalScore = totalScore,
+                cardboardPaperScore = cardboardPaperScore,
+                plasticScore = plasticScore,
+                glassScore = glassScore,
+                otherScore = otherScore,
+                metalScore = metalScore,
+                foodScrapsScore = foodScrapsScore,
+                organicYardWasteScore = organicYardWasteScore
+            )
+        )
+    }
+
+    private fun calculateTotalScore(monthlyData: List<GarbageMonthlyEntity>): Int {
+        val totalCardboardPaper = monthlyData.sumOf { it.cardboardPaper }
+        val totalPlastic = monthlyData.sumOf { it.plastic }
+        val totalGlass = monthlyData.sumOf { it.glass }
+        val totalOther = monthlyData.sumOf { it.other }
+        val totalMetal = monthlyData.sumOf { it.metal }
+        val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
+        val totalOrganicYardWaste = monthlyData.sumOf { it.organicYardWaste }
+
+        return totalCardboardPaper * garbageScoreTable["cardboard_paper"]!! +
+                totalPlastic * garbageScoreTable["plastic"]!! +
+                totalGlass * garbageScoreTable["glass"]!! +
+                totalOther * garbageScoreTable["other"]!! +
+                totalMetal * garbageScoreTable["metal"]!! +
+                totalFoodScraps * garbageScoreTable["food_scraps"]!! +
+                totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
     }
 }
-
-//        daily data ex:
-//        Ranker(id = 1L, username = "Alice", point = 1200),
-//        Ranker(id = 2L, username = "Bob", point = 1150),
-//        Ranker(id = 3L, username = "Charlie", point = 1100),
-//        Ranker(id = 4L, username = "David", point = 1000),
-//        Ranker(id = 5L, username = "Eve", point = 950)
-//
-//        weekly data ex:
-//        Ranker(id = 1L, username = "Alice", point = 7000),
-//        Ranker(id = 2L, username = "Bob", point = 6800),
-//        Ranker(id = 3L, username = "Charlie", point = 6700),
-//        Ranker(id = 4L, username = "David", point = 6600),
-//        Ranker(id = 5L, username = "Eve", point = 6500)
-//
-//        monthly data ex:
-//        rankers = listOf(
-//            Ranker(id = 1L, username = "Alice", point = 30000),
-//            Ranker(id = 2L, username = "Bob", point = 29000),
-//            Ranker(id = 3L, username = "Charlie", point = 28000),
-//            Ranker(id = 4L, username = "David", point = 27000),
-//            Ranker(id = 5L, username = "Eve", point = 26000)
