@@ -3,6 +3,7 @@ server:
   error:
     include-exception: false
     include-stacktrace: never
+    address: 0.0.0.0 #todo frontend ip 로 바꾸기
 
 general:
   api-base-url: ${API_BASE_URL:https://eco-picker.com/api}
