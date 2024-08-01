@@ -9,8 +9,11 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.info.License
+import io.swagger.v3.oas.models.servers.Server
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpHeaders
 
 @SecuritySchemes(
@@ -25,11 +28,17 @@ import org.springframework.http.HttpHeaders
     )
 )
 @Configuration
-class OpenAPIConfig {
+class OpenAPIConfig(
+    private val env: Environment,
+    @Value("\${general.api-base-url}")
+    private val apiBaseUrl: String,
+    @Value("\${server.port}")
+    private val port: Int,
+) {
 
     @Bean
     fun openAPI(): OpenAPI {
-        return OpenAPI()
+        val openApi = OpenAPI()
             .info(
                 Info().title("Eco Picker API")
                     .description(
@@ -45,7 +54,7 @@ class OpenAPIConfig {
                                 "    \"timestamp\": datetime,\n" +
                                 "    ...\n" +
                                 "  }\n" +
-                                "[TODO] Domain: `\"https://eco-picker.com\"`, `\"https://eco-picker.io\"`, or other domains.\n"
+                                "Prod-Domain: `\"https://eco-picker.com\"`"
                     )
                     .version("1.0")
                     .contact(
@@ -58,11 +67,37 @@ class OpenAPIConfig {
                             .url("https://opensource.org/licenses/MIT")
                     )
             )
+
+        val activeProfiles: Array<String> = env.activeProfiles
+        val activeProfile = if (activeProfiles.isEmpty()) {
+            "default"
+        } else {
+            activeProfiles[0]
+        }
+
+        val baseUrl = apiBaseUrl.replace("/api", "")
+
+        when (activeProfile) {
+            "dev" -> {
+                openApi.addServersItem(
+                    Server().url("http://localhost:$port").description(activeProfile)
+                ).addServersItem(
+                    Server().url(baseUrl).description("production")
+                )
+            }
+
+            "production" -> {
+                openApi.addServersItem(
+                    Server().url(baseUrl).description(activeProfile)
+                )
+            }
+        }
+        return openApi
     }
 
 
     companion object {
-        const val JWT = "Json Web Token";
+        const val JWT = "Json Web Token"
     }
 
 }

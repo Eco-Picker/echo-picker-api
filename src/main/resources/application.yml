@@ -1,9 +1,9 @@
 server:
   port: 15000
+  address: 0.0.0.0
   error:
     include-exception: false
     include-stacktrace: never
-    address: 0.0.0.0 #todo frontend ip 로 바꾸기
 
 general:
   api-base-url: ${API_BASE_URL:https://eco-picker.com/api}
@@ -11,6 +11,8 @@ general:
   static-base-url: ${STATIC_BASE_URL:https://eco-picker.com/static}
 
 spring:
+  profiles:
+    active: ${PROFILE:dev}
   config:
     import: optional:file:.env[.properties]
   application:
