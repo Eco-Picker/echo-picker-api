@@ -27,10 +27,10 @@ class SecurityConfig() {
             cors.configurationSource(corsConfigurationSource())
         }.authorizeHttpRequests { authorize ->
             authorize.requestMatchers(
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-resources/**",
-                "/p/**",
+                "/api/swagger-ui/**",
+                "/api/v3/api-docs/**",
+                "/api/swagger-resources/**",
+                "/api/p/**",
                 "/actuator/**"
             ).permitAll()
                 .anyRequest()
