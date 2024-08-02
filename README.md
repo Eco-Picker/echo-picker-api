@@ -45,10 +45,9 @@ docker-compose up -d
 
 ### Swagger
 
-http://localhost:15000/swagger-ui/index.html
-
+http://localhost:15000/api/swagger-ui/index.html
 ### Health Check 
-http://localhost:15000/actuator/health
+http://localhost:15000/api/actuator/health
 
 ## License
 
