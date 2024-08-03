@@ -84,6 +84,7 @@ management:
     web:
       exposure:
         include: health,info
+      base-path: /api/actuator
   endpoint:
     health:
       show-details: always
