@@ -27,10 +27,11 @@ class NewsletterService(
 ) {
     private val logger = KotlinLogging.logger { }
 
-    private fun generateNewsletter(category: NewsletterCategory): Boolean {
-        val newsletter = this.geminiManager.generateNewsletter(category = category)
-        return true
-    }
+    // comment out - just to pass gradlew build for now
+//    private fun generateNewsletter(category: NewsletterCategory): Boolean {
+//        val newsletter = this.geminiManager.generateNewsletter(category = category)
+//        return true
+//    }
 
     fun getRandomNewsletterSummary(): NewsletterSummary {
         // @todo 이게 필요한가..

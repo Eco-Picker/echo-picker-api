@@ -27,7 +27,7 @@ class FileManager(private val fileProperties: FileProperties) {
             throw IllegalArgumentException("File size exceeds the maximum limit of 10MB")
         }
 
-        val filename = file.originalFilename ?: null
+        val filename = file.originalFilename
         if (filename.isNullOrEmpty()) {
             throw Exception("File name must not be null or empty")
         }

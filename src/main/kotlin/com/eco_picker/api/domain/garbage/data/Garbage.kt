@@ -19,4 +19,10 @@ data class Garbage(
 
     @field:Schema(description = "picked up datetime", required = true)
     val pickedUpAt: ZonedDateTime,
+
+    @field:Schema(description = "Latitude of the garbage location", required = true)
+    val latitude: Double,
+
+    @field:Schema(description = "Longitude of the garbage location", required = true)
+    val longitude: Double
 )

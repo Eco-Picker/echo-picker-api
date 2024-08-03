@@ -8,6 +8,9 @@ data class AnalyzeGarbageRequest(
     @field:Schema(description = "Garbage category selected by User")
     val category: GarbageCategory,
 
-    @field:Schema(description = "Garbage image")
-    val image: MultipartFile
+//    @field:Schema(description = "Garbage image")
+//    val image: MultipartFile
+    // just for fake data
+    @field:Schema(description = "Image data as a string")
+    val image: String // Change from MultipartFile to String
 )

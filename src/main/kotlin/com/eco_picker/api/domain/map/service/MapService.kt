@@ -35,7 +35,9 @@ class MapService {
                 name = "",
                 category = GarbageCategory.GLASS,
                 memo = null,
-                pickedUpAt = ZonedDateTime.now()
+                pickedUpAt = ZonedDateTime.now(),
+                latitude = 37.7749, // Example latitude
+                longitude = -122.4194 // Example longitude
             )
         )
     }
