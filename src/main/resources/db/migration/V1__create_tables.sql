@@ -1,3 +1,6 @@
+-- @todo entity 이용해서 자동으로 table 관리되므로 중복 관리 포인트를 없애기 위해 추후 삭제 필요
+-- 참고) 미희: 작업한 DDL 은 이미 삭제 함, 모두 작업 완료하시면 해당 파일 삭제 부탁드려요.
+
 -- User Table
 CREATE TABLE user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -19,19 +22,6 @@ CREATE TABLE garbage (
     latitude DOUBLE NOT NULL,
     longitude DOUBLE NOT NULL,
     collected_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (user_id) REFERENCES user(id)
-);
-
--- Auth Table
-CREATE TABLE auth (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    access_token VARCHAR(1000),
-    expires_at TIMESTAMP NOT NULL,
-    refresh_token VARCHAR(1000),
-    refresh_expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
@@ -83,38 +73,4 @@ CREATE TABLE ranking (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
-);
-
--- Newsletter Event Table
-CREATE TABLE newsletter_event (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    source VARCHAR(255) NOT NULL,
-    start_at TIMESTAMP,
-    end_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NULL
-);
-
--- Newsletter Education Table
-CREATE TABLE newsletter_education (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    source VARCHAR(255) NOT NULL,
-    published_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NULL
-);
-
--- Newsletter News Table
-CREATE TABLE newsletter_news (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    source VARCHAR(255) NOT NULL,
-    published_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT NULL
 );

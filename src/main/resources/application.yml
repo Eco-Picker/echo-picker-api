@@ -32,6 +32,9 @@ spring:
           starttls:
             enable: true
             required: true
+  sql:
+    init:
+      mode: always
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -46,6 +49,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: ${DB_USE_DEBUG_MODE:false}
         use_sql_comments: ${DB_USE_DEBUG_MODE:false}
+    defer-datasource-initialization: true
 
 
 file:
@@ -62,8 +66,10 @@ gemini:
 
 logging:
   level:
-    root: INFO
+    root: INFO`
     com.eco_picker: DEBUG
+    org.hibernate.SQL: ${DB_SQL_LOGGING_LEVEL:INFO}
+    org.hibernate.orm.jdbc.bind: ${DB_SQL_PARAMETER_LOGGING_LEVEL:INFO}
 
 springdoc:
   api-docs:

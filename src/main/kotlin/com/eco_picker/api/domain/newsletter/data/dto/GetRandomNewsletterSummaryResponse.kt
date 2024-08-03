@@ -6,6 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 data class GetRandomNewsletterSummaryResponse(
     @field:Schema(description = "newsletter summary")
-    val newsletterSummary: NewsletterSummary
+    val newsletterSummary: NewsletterSummary? = null
 ) : DefaultResponse()
 

@@ -1,6 +1,10 @@
 package com.eco_picker.api.domain.newsletter.controller
 
-import com.eco_picker.api.domain.newsletter.data.dto.*
+import com.eco_picker.api.domain.newsletter.constant.NewsletterCategory
+import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterResponse
+import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterSummariesRequest
+import com.eco_picker.api.domain.newsletter.data.dto.GetNewsletterSummariesResponse
+import com.eco_picker.api.domain.newsletter.data.dto.GetRandomNewsletterSummaryResponse
 import com.eco_picker.api.domain.newsletter.service.NewsletterService
 import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.document.OpenAPIConfig.Companion.JWT
@@ -8,10 +12,7 @@ import com.eco_picker.api.global.document.OperationTag
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class NewsletterController(private val newsletterService: NewsletterService) {
@@ -23,6 +24,9 @@ class NewsletterController(private val newsletterService: NewsletterService) {
     @GetMapping("/random_newsletter_summary")
     fun getRandomNewsletterSummary(): GetRandomNewsletterSummaryResponse {
         val newsletterSummary = this.newsletterService.getRandomNewsletterSummary()
+            ?: return GetRandomNewsletterSummaryResponse().apply {
+                message = "Not found newsletter summary"
+            }
         return GetRandomNewsletterSummaryResponse(newsletterSummary = newsletterSummary).apply {
             result = true
         }
@@ -38,20 +42,27 @@ class NewsletterController(private val newsletterService: NewsletterService) {
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestBody getNewsletterSummariesRequest: GetNewsletterSummariesRequest,
     ): GetNewsletterSummariesResponse {
-        return this.newsletterService.getNewsletterSummaries(params = getNewsletterSummariesRequest)
+        val category = getNewsletterSummariesRequest.category?.let { NewsletterCategory.valueOf(it.uppercase()) }
+        return this.newsletterService.getNewsletterSummaries(
+            offset = getNewsletterSummariesRequest.offset,
+            limit = getNewsletterSummariesRequest.limit,
+            category = category
+        )
     }
-    
+
     @Operation(
         tags = [OperationTag.NEWSLETTER],
         security = [SecurityRequirement(name = JWT)],
         summary = "Get a newsletter",
     )
-    @PostMapping("/newsletter")
+    @GetMapping("/newsletter/{id}")
     fun getEvent(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @RequestBody getNewsletterRequest: GetNewsletterRequest
+        @PathVariable id: Long,
     ): GetNewsletterResponse {
-        val newsletter = this.newsletterService.getNewsletter(params = getNewsletterRequest)
+        val newsletter = this.newsletterService.getNewsletter(id = id) ?: return GetNewsletterResponse().apply {
+            message = "Not found newsletter"
+        }
         return GetNewsletterResponse(newsletter = newsletter).apply {
             result = true
         }

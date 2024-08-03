@@ -20,12 +20,6 @@ data class Newsletter(
     @field:Schema(description = "source", required = true)
     val source: String,
 
-    @field:Schema(description = "published datetime")
-    val publishedAt: ZonedDateTime? = null,
-
-    @field:Schema(description = "start datetime")
-    val startAt: ZonedDateTime? = null,
-
-    @field:Schema(description = "end datetime")
-    val endAt: ZonedDateTime? = null,
+    @field:Schema(description = "published datetime", required = true)
+    val publishedAt: ZonedDateTime,
 )
