@@ -200,22 +200,26 @@ class AuthService(
         try {
             val userEmailVerificationEntity = userEmailVerifyRepository.findByToken(token)
                 ?: return VerifyMailResponse().apply {
+                    logger.debug { "Not found token" }
                     code = VerifyMailResponse.Code.INVALIDATED_TOKEN
                 }
 
             userEmailVerificationEntity.let {
                 if (it.verifiedAt != null) {
+                    logger.debug { "Already verified user" }
                     return VerifyMailResponse().apply {
                         code = VerifyMailResponse.Code.ALREADY_VERIFIED_USER
                     }
                 }
                 if (it.issuedAt.plusMinutes(10).isBefore(ZonedDateTime.now())) {
+                    logger.debug { "Expired token" }
                     return VerifyMailResponse().apply {
                         code = VerifyMailResponse.Code.INVALIDATED_TOKEN
                     }
                 }
                 val userEntity = userRepository.findById(it.userId)
                 if (userEntity.isEmpty) {
+                    logger.debug { "Not found user" }
                     return VerifyMailResponse().apply {
                         code = VerifyMailResponse.Code.INVALIDATED_TOKEN
                     }

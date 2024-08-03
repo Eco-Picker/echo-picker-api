@@ -31,7 +31,9 @@ class SecurityConfig() {
                 "/api/v3/api-docs/**",
                 "/api/swagger-resources/**",
                 "/api/p/**",
-                "/actuator/**"
+                "/actuator/**",
+                "/email-verification-success.html",
+                "/email-verification-failed.html"
             ).permitAll()
                 .anyRequest()
                 .authenticated()
