@@ -13,14 +13,15 @@ import com.eco_picker.api.domain.user.repository.UserRepository
 import com.eco_picker.api.global.data.UserPrincipal
 import com.eco_picker.api.global.support.JwtManager
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.security.SecureRandom
 import java.time.ZonedDateTime
 import java.util.*
+import kotlin.random.Random
 
 @Service
 class AuthService(
@@ -30,7 +31,8 @@ class AuthService(
     private val userRepository: UserRepository,
     private val userEmailVerifyRepository: UserEmailVerificationRepository,
     private val authRepository: AuthRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val env: Environment,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -63,7 +65,7 @@ class AuthService(
                     username = username,
                     email = email,
                     password = passwordEncoder.encode(password),
-                    onboardingStatus = OnboardingStatus.COMPLETE, // @todo BEGIN 으로 바꾸기, local test flag 추가
+                    onboardingStatus = OnboardingStatus.BEGIN,
                 )
             )
 
@@ -80,8 +82,9 @@ class AuthService(
                 )
             )
 
-            // @todo frontend 테스트 중에는 잠시 제거 (flag 추가)
-            // mailService.sendVerify(username = username, email = email, token = verifyMailToken)
+            if (!env.activeProfiles.contains("dev")) {
+                mailService.sendVerify(username = username, email = email, token = verifyMailToken)
+            }
             return SignupResponse().apply {
                 result = true
             }
@@ -260,15 +263,24 @@ class AuthService(
     }
 
     fun generateTempPassword(length: Int = 12): String {
-        val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:',.<>?/"
-        val secureRandom = SecureRandom()
-        val password = StringBuilder(length)
+        val lowercase = "abcdefghijklmnopqrstuvwxyz"
+        val uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val digits = "0123456789"
+        val specialChars = "!@#$%^&*()-_=+[]{}|;:',.<>?/"
 
-        for (i in 0 until length) {
-            val randomIndex = secureRandom.nextInt(characters.length)
-            password.append(characters[randomIndex])
+        val allChars = lowercase + uppercase + digits + specialChars
+        val random = Random.Default
+
+        var password = ""
+        password += lowercase[random.nextInt(lowercase.length)]
+        password += uppercase[random.nextInt(uppercase.length)]
+        password += digits[random.nextInt(digits.length)]
+        password += specialChars[random.nextInt(specialChars.length)]
+
+        repeat(length - 4) {
+            password += allChars[random.nextInt(allChars.length)]
         }
-
-        return password.toString()
+        
+        return password.toCharArray().apply { shuffle(random) }.joinToString("")
     }
 }
