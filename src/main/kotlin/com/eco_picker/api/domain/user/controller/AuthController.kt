@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import org.springframework.web.servlet.view.RedirectView
 
 @RestController
 class AuthController(private val authService: AuthService) {
@@ -68,10 +70,20 @@ class AuthController(private val authService: AuthService) {
     )
     @GetMapping("/p/auth/verify_mail/{token}")
     fun verifyMail(
-        @Schema(description = "Encrypted token generated for sending signup verification email.")
-        @PathVariable token: String
-    ): VerifyMailResponse {
-        return authService.verifyMail(token)
+        @Schema(
+            description = "- Encrypted token generated for sending signup verification email.\n" +
+                    "- This response from this API is not an HTTP response but a an HTML redirect."
+        )
+        @PathVariable token: String,
+        redirectAttributes: RedirectAttributes
+    ): RedirectView {
+        val response = authService.verifyMail(token)
+        if (!response.result) {
+            redirectAttributes.addFlashAttribute("error", response.code)
+            return RedirectView("/email-verification-failed.html")
+        } else {
+            return RedirectView("/email-verification-success.html")
+        }
     }
 
     @Operation(

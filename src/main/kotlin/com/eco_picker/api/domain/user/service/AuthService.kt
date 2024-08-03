@@ -65,7 +65,11 @@ class AuthService(
                     username = username,
                     email = email,
                     password = passwordEncoder.encode(password),
-                    onboardingStatus = OnboardingStatus.BEGIN,
+                    onboardingStatus = if (env.activeProfiles.contains("dev")) {
+                        OnboardingStatus.COMPLETE
+                    } else {
+                        OnboardingStatus.BEGIN
+                    },
                 )
             )
 
@@ -280,7 +284,7 @@ class AuthService(
         repeat(length - 4) {
             password += allChars[random.nextInt(allChars.length)]
         }
-        
+
         return password.toCharArray().apply { shuffle(random) }.joinToString("")
     }
 }

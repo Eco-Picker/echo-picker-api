@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verified</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #F5F5F5;
+            font-family: Arial, sans-serif;
+        }
+
+        .verification-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .verification-container .checkmark {
+            font-size: 50px;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .verification-container h1 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+
+        .verification-container p {
+            color: #666;
+            margin: 10px 0 20px;
+        }
+
+        .verification-container button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .verification-container button:hover {
+            background-color: #6BBD6E;
+        }
+    </style>
+    <script>
+        function closeWindow() {
+            window.close();
+        }
+    </script>
+</head>
+<body>
+<div class="verification-container">
+    <div class="checkmark">✔</div>
+    <h1>Verified!</h1>
+    <p>You have successfully verified your account.</p>
+    <button onclick="closeWindow()">Ok</button>
+</div>
+</body>
+</html>
