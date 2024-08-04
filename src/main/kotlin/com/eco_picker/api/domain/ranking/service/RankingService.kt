@@ -1,20 +1,20 @@
 package com.eco_picker.api.domain.ranking.service
 
-import com.eco_picker.api.domain.garbage.repository.GarbageMonthlyRepository
 import com.eco_picker.api.domain.garbage.data.entity.GarbageMonthlyEntity
+import com.eco_picker.api.domain.garbage.repository.GarbageMonthlyRepository
+import com.eco_picker.api.domain.ranking.data.GeneralRanker
 import com.eco_picker.api.domain.ranking.data.GeneralRanking
 import com.eco_picker.api.domain.ranking.data.Ranker
-import com.eco_picker.api.domain.ranking.data.GeneralRanker
 import com.eco_picker.api.domain.ranking.data.dto.RankerStatisticsResponse
-import org.springframework.stereotype.Service
-import org.springframework.data.domain.PageRequest
 import com.eco_picker.api.domain.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.persistence.EntityNotFoundException
+import org.springframework.data.domain.PageRequest
+import org.springframework.stereotype.Service
 
 
 @Service
-class RankingService (
+class RankingService(
     private val userRepository: UserRepository,
     private val garbageMonthlyRepository: GarbageMonthlyRepository
 ) {
@@ -32,6 +32,7 @@ class RankingService (
 
     fun getRanking(offset: Int, limit: Int): GeneralRanking {
         return try {
+            // @todo pageable 로직 변경되었으니 추후 getNewsletterSummaries 쪽 소스 참조해주세요.
             val pageable = PageRequest.of(offset, limit)
             val users = userRepository.findAll(pageable)
 
@@ -56,7 +57,8 @@ class RankingService (
 
     fun getRankerDetail(userId: Long): Ranker {
         return try {
-            val userEntity = userRepository.findById(userId).orElseThrow { EntityNotFoundException("User not found with id: $userId") }
+            val userEntity = userRepository.findById(userId)
+                .orElseThrow { EntityNotFoundException("User not found with id: $userId") }
             val rankerStatistics = getRankerStatistics(userId)
 
             Ranker(
@@ -92,7 +94,8 @@ class RankingService (
         val foodScrapsScore = totalFoodScraps * garbageScoreTable["food_scraps"]!!
         val organicYardWasteScore = totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
 
-        val totalScore = cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore + organicYardWasteScore
+        val totalScore =
+            cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore + organicYardWasteScore
 
         return RankerStatisticsResponse.RankerStatistics(
             count = RankerStatisticsResponse.Count(

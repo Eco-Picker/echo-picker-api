@@ -54,17 +54,23 @@ class NewsletterService(
 
     fun getNewsletterSummaries(offset: Int, limit: Int, category: NewsletterCategory?): GetNewsletterSummariesResponse {
         try {
-            val pageable = PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "id"))
+            val pageNumber = offset / limit
+
+            val pageable = PageRequest.of(pageNumber, limit, Sort.by(Sort.Direction.DESC, "id"))
             val pages = if (category != null) {
                 newsletterRepository.findAllByCategory(category, pageable)
             } else {
                 newsletterRepository.findAll(pageable)
             }
 
+            val currentPage = pageNumber + 1
+            val totalItems = pages.totalElements
+            val totalPages = (totalItems + limit - 1) / limit
+
             return GetNewsletterSummariesResponse(
-                currentPage = pages.number,
-                totalItems = pages.totalElements,
-                totalPages = pages.totalPages,
+                currentPage = currentPage,
+                totalItems = totalItems,
+                totalPages = totalPages.toInt(),
                 newsletterSummaryList = pages.content.map {
                     NewsletterSummary(
                         id = it.id!!,
