@@ -118,10 +118,8 @@ class UserService(
 
         return try {
             // Check if the user exists before proceeding with statistics
-            val userExists = userRepository.existsById(userId)
-            if (!userExists) {
-                throw EntityNotFoundException("User not found with id: $userId")
-            }
+            val userEntity = userRepository.findById(userId).orElseThrow { EntityNotFoundException("User not found with id: $userId") }
+            val userName = userEntity.username
 
             val now = ZonedDateTime.now()
             val currentMonth = now.format(DateTimeFormatter.ofPattern("yyyyMM"))
@@ -192,6 +190,9 @@ class UserService(
                     metalScore = metalScore,
                     foodScrapsScore = foodScrapsScore,
                     organicYardWasteScore = organicYardWasteScore
+                ),
+                username = UserStatisticsResponse.UserName(
+                    userName = userName
                 )
             )
             response.result = true
