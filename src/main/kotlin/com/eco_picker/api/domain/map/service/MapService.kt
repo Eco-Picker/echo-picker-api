@@ -1,44 +1,20 @@
 package com.eco_picker.api.domain.map.service
 
-import com.eco_picker.api.domain.garbage.constant.GarbageCategory
-import com.eco_picker.api.domain.garbage.data.Garbage
+import com.eco_picker.api.domain.garbage.repository.GarbageRepository
 import com.eco_picker.api.domain.map.data.GarbageLocation
-import com.eco_picker.api.domain.map.data.GarbageLocationDetail
 import org.springframework.stereotype.Service
-import java.time.ZonedDateTime
 
 @Service
-class MapService {
+class MapService(private val garbageRepository: GarbageRepository) {
     fun getMyGarbageLocations(userId: Long): List<GarbageLocation> {
-        return listOf(
+        val garbageEntities = garbageRepository.findByUserId(userId = userId)
+        return garbageEntities.map {
             GarbageLocation(
-                garbageId = 1L,
-                garbageCategory = GarbageCategory.GLASS,
-                longitude = "",
-                latitude = ""
-            ),
-            GarbageLocation(
-                garbageId = 2L,
-                garbageCategory = GarbageCategory.GLASS,
-                longitude = "",
-                latitude = ""
+                garbageId = it?.id!!,
+                garbageCategory = it.category,
+                latitude = it.latitude,
+                longitude = it.longitude
             )
-        )
-    }
-
-    fun getMyGarbageLocation(userId: Long, garbageId: Long): GarbageLocationDetail? {
-        return GarbageLocationDetail(
-            longitude = "",
-            latitude = "",
-            garbage = Garbage(
-                id = 1L,
-                name = "",
-                category = GarbageCategory.GLASS,
-                memo = null,
-                pickedUpAt = ZonedDateTime.now(),
-                latitude = 37.7749, // Example latitude
-                longitude = -122.4194 // Example longitude
-            )
-        )
+        }
     }
 }

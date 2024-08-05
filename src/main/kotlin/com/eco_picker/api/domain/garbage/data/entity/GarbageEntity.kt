@@ -1,5 +1,6 @@
 package com.eco_picker.api.domain.garbage.data.entity
 
+import com.eco_picker.api.domain.garbage.constant.GarbageCategory
 import jakarta.persistence.*
 import java.time.ZonedDateTime
 
@@ -14,11 +15,12 @@ data class GarbageEntity(
     @Column(name = "user_id", nullable = false)
     val userId: Long,
 
-    @Column(name = "garbage_name", nullable = false)
-    val garbageName: String,
+    @Column(name = "name", length = 255, nullable = false)
+    val name: String,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    val category: String,
+    val category: GarbageCategory,
 
     @Column(name = "memo")
     val memo: String? = null,

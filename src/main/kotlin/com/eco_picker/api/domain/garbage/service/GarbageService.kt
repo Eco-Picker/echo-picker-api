@@ -2,13 +2,18 @@ package com.eco_picker.api.domain.garbage.service
 
 import com.eco_picker.api.domain.garbage.constant.GarbageCategory
 import com.eco_picker.api.domain.garbage.data.Garbage
+import com.eco_picker.api.domain.garbage.repository.GarbageRepository
 import com.eco_picker.api.global.support.FileManager
 import com.eco_picker.api.global.support.GeminiManager
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
 
 @Service
-class GarbageService(private val fileManager: FileManager, private val geminiManager: GeminiManager) {
+class GarbageService(
+    private val fileManager: FileManager,
+    private val geminiManager: GeminiManager,
+    private val garbageRepository: GarbageRepository
+) {
     // for fake data - just for this weekend
     fun analyzeImage(userId: Long, category: GarbageCategory, imageData: String): Garbage? {
         // Fake analysis using imageData string
@@ -64,4 +69,20 @@ class GarbageService(private val fileManager: FileManager, private val geminiMan
 //    private fun calculatePoint(userId: Long): Boolean {
 //        return true
 //    }
+
+    fun getGarbage(userId: Long, id: Long): Garbage? {
+        val garbageEntity = this.garbageRepository.findById(id)
+        if (garbageEntity.isPresent) {
+            return Garbage(
+                id = garbageEntity.get().id!!,
+                name = garbageEntity.get().name,
+                memo = garbageEntity.get().memo,
+                pickedUpAt = garbageEntity.get().collectedAt,
+                latitude = garbageEntity.get().latitude,
+                longitude = garbageEntity.get().longitude,
+                category = garbageEntity.get().category
+            )
+        }
+        return null
+    }
 }

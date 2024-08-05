@@ -9,4 +9,5 @@ interface GarbageRepository : JpaRepository<GarbageEntity, Long> {
     @Query("SELECT COUNT(g) FROM GarbageEntity g WHERE g.userId = :userId AND DATE(g.collectedAt) = CURDATE()")
     fun countByUserIdAndCollectedAt(userId: Long): Int
 
+    fun findByUserId(userId: Long): List<GarbageEntity?>
 }

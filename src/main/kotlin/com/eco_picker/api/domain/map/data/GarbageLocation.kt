@@ -11,8 +11,8 @@ data class GarbageLocation(
     val garbageCategory: GarbageCategory,
 
     @field:Schema(description = "Longitude of the location")
-    val longitude: String,
+    val longitude: Double,
 
     @field:Schema(description = "Latitude of the location")
-    val latitude: String
+    val latitude: Double
 )
