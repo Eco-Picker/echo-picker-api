@@ -6,6 +6,5 @@ enum class GarbageCategory {
     GLASS,
     CARDBOARD_PAPER,
     FOOD_SCRAPS,
-    ORGANIC_YARD_WASTE,
     OTHER
 }
