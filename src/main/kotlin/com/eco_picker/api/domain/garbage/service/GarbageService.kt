@@ -34,6 +34,7 @@ class GarbageService(
     private val logger = KotlinLogging.logger { }
 
     fun analyzeImage(userId: Long, file: MultipartFile): GeminiGarbage? {
+        logger.debug { "FILE FROM FRONTEND: '${file}'" }
         // Resize the image
         val resizedImage = resizeImage(file)
 
