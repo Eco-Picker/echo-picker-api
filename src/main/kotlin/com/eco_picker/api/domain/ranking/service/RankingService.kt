@@ -26,8 +26,7 @@ class RankingService(
         "glass" to 3,
         "cardboard_paper" to 4,
         "food_scraps" to 5,
-        "organic_yard_waste" to 6,
-        "other" to 7
+        "other" to 6
     )
 
     fun getRanking(offset: Int, limit: Int): GeneralRanking {
@@ -55,7 +54,7 @@ class RankingService(
         }
     }
 
-    fun getRankerDetail(userId: Long): Ranker {
+    fun getRankerDetail(userId: Long): Ranker? {
         return try {
             val userEntity = userRepository.findById(userId)
                 .orElseThrow { EntityNotFoundException("User not found with id: $userId") }
@@ -66,16 +65,16 @@ class RankingService(
                 username = userEntity.username,
                 rankerStatistics = rankerStatistics
             )
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to get ranker detail for userId: $userId" }
-            throw e
+        } catch (e: EntityNotFoundException) {
+            logger.error(e) { "User not found with id: $userId" }
+            null
         }
     }
 
     private fun getRankerStatistics(userId: Long): RankerStatisticsResponse.RankerStatistics {
         val monthlyData = garbageMonthlyRepository.findByUserId(userId)
         val totalCount = monthlyData.sumOf {
-            it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.organicYardWaste + it.other
+            it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.other
         }
 
         val totalCardboardPaper = monthlyData.sumOf { it.cardboardPaper }
@@ -84,7 +83,6 @@ class RankingService(
         val totalOther = monthlyData.sumOf { it.other }
         val totalMetal = monthlyData.sumOf { it.metal }
         val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
-        val totalOrganicYardWaste = monthlyData.sumOf { it.organicYardWaste }
 
         val cardboardPaperScore = totalCardboardPaper * garbageScoreTable["cardboard_paper"]!!
         val plasticScore = totalPlastic * garbageScoreTable["plastic"]!!
@@ -92,10 +90,9 @@ class RankingService(
         val otherScore = totalOther * garbageScoreTable["other"]!!
         val metalScore = totalMetal * garbageScoreTable["metal"]!!
         val foodScrapsScore = totalFoodScraps * garbageScoreTable["food_scraps"]!!
-        val organicYardWasteScore = totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
 
         val totalScore =
-            cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore + organicYardWasteScore
+            cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore
 
         return RankerStatisticsResponse.RankerStatistics(
             count = RankerStatisticsResponse.Count(
@@ -105,8 +102,7 @@ class RankingService(
                 totalGlass = totalGlass,
                 totalOther = totalOther,
                 totalMetal = totalMetal,
-                totalFoodScraps = totalFoodScraps,
-                totalOrganicYardWaste = totalOrganicYardWaste
+                totalFoodScraps = totalFoodScraps
             ),
             score = RankerStatisticsResponse.Score(
                 totalScore = totalScore,
@@ -115,8 +111,7 @@ class RankingService(
                 glassScore = glassScore,
                 otherScore = otherScore,
                 metalScore = metalScore,
-                foodScrapsScore = foodScrapsScore,
-                organicYardWasteScore = organicYardWasteScore
+                foodScrapsScore = foodScrapsScore
             )
         )
     }
@@ -128,14 +123,12 @@ class RankingService(
         val totalOther = monthlyData.sumOf { it.other }
         val totalMetal = monthlyData.sumOf { it.metal }
         val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
-        val totalOrganicYardWaste = monthlyData.sumOf { it.organicYardWaste }
 
         return totalCardboardPaper * garbageScoreTable["cardboard_paper"]!! +
                 totalPlastic * garbageScoreTable["plastic"]!! +
                 totalGlass * garbageScoreTable["glass"]!! +
                 totalOther * garbageScoreTable["other"]!! +
                 totalMetal * garbageScoreTable["metal"]!! +
-                totalFoodScraps * garbageScoreTable["food_scraps"]!! +
-                totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
+                totalFoodScraps * garbageScoreTable["food_scraps"]!!
     }
 }

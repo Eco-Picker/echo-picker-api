@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.time.ZonedDateTime
 
 @RestController()
 class RankingController(private val rankingService: RankingService) {
@@ -33,12 +34,24 @@ class RankingController(private val rankingService: RankingService) {
         security = [SecurityRequirement(name = JWT)],
         summary = "Get a ranker",
     )
-    @GetMapping("/ranker/{rankingId}")
+    @GetMapping("/ranker/{userId}")
     fun getRankerDetail(
         @AuthenticationPrincipal principal: UserPrincipal,
-        @PathVariable("rankingId") rankingId: String
+        @PathVariable("userId") userId: String
     ): GetRankerDetailResponse {
-        val rankerDetail = rankingService.getRankerDetail(rankingId.toLong())
-        return GetRankerDetailResponse(rankerDetail = rankerDetail).apply { result = true }
+        val rankerDetail = rankingService.getRankerDetail(userId.toLong())
+        return if (rankerDetail != null) {
+            GetRankerDetailResponse(rankerDetail = rankerDetail).apply {
+                result = true
+                timestamp = ZonedDateTime.now()
+            }
+        } else {
+            GetRankerDetailResponse().apply {
+                result = false
+                message = "User not found with id: $userId"
+                code = GetRankerDetailResponse.Code.USER_NOT_FOUND
+                timestamp = ZonedDateTime.now()
+            }
+        }
     }
 }

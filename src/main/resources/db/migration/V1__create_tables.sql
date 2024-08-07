@@ -18,7 +18,6 @@ CREATE TABLE garbage (
     user_id BIGINT NOT NULL,
     garbage_name VARCHAR(255) NOT NULL, -- using prefix to avoid potential compatibility issues
     category VARCHAR(50) NOT NULL,
-    memo VARCHAR(1000),
     latitude DOUBLE NOT NULL,
     longitude DOUBLE NOT NULL,
     collected_at TIMESTAMP NOT NULL,
@@ -37,7 +36,6 @@ CREATE TABLE garbage_monthly (
     glass INT,
     cardboard_paper INT,
     food_scraps INT,
-    organic_yard_waste INT,
     other INT,
     total_score INT,
     created_at TIMESTAMP NOT NULL,
@@ -55,7 +53,6 @@ CREATE TABLE garbage_weekly (
     glass INT,
     cardboard_paper INT,
     food_scraps INT,
-    organic_yard_waste INT,
     other INT,
     total_score INT,
     created_at TIMESTAMP NOT NULL,

@@ -27,7 +27,6 @@ class UserStatisticsResponse : BaseResponse<UserStatisticsResponse.Code>() {
         val totalOther: Int,
         val totalMetal: Int,
         val totalFoodScraps: Int,
-        val totalOrganicYardWaste: Int
     )
 
     data class Score(
@@ -38,7 +37,6 @@ class UserStatisticsResponse : BaseResponse<UserStatisticsResponse.Code>() {
         val otherScore: Int,
         val metalScore: Int,
         val foodScrapsScore: Int,
-        val organicYardWasteScore: Int
     )
 
     data class UserName(

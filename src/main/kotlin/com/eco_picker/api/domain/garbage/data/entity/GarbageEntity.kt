@@ -15,15 +15,12 @@ data class GarbageEntity(
     @Column(name = "user_id", nullable = false)
     val userId: Long,
 
-    @Column(name = "name", length = 255, nullable = false)
+    @Column(name = "garbage_name", length = 255, nullable = false)
     val name: String,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     val category: GarbageCategory,
-
-    @Column(name = "memo")
-    val memo: String? = null,
 
     @Column(name = "latitude", nullable = false)
     val latitude: Double,

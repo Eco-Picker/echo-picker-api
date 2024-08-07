@@ -22,8 +22,7 @@ class RankerStatisticsResponse : BaseResponse<RankerStatisticsResponse.Code>() {
         val totalGlass: Int,
         val totalOther: Int,
         val totalMetal: Int,
-        val totalFoodScraps: Int,
-        val totalOrganicYardWaste: Int
+        val totalFoodScraps: Int
     )
 
     data class Score(
@@ -33,7 +32,6 @@ class RankerStatisticsResponse : BaseResponse<RankerStatisticsResponse.Code>() {
         val glassScore: Int,
         val otherScore: Int,
         val metalScore: Int,
-        val foodScrapsScore: Int,
-        val organicYardWasteScore: Int
+        val foodScrapsScore: Int
     )
 }

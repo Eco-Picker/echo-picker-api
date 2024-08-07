@@ -50,6 +50,10 @@ spring:
         format_sql: ${DB_USE_DEBUG_MODE:false}
         use_sql_comments: ${DB_USE_DEBUG_MODE:false}
     defer-datasource-initialization: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 
 file:
@@ -62,7 +66,7 @@ security:
     refresh-token-validity: ${JWT_REFRESH_TOKEN_VALIDITY:1800000}
 
 gemini:
-  app-key: ${APP_KEY}
+  app-key: ${GEMINI_APP_KEY}
 
 logging:
   level:

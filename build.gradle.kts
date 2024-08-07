@@ -64,6 +64,12 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // gemini
+    implementation("com.squareup.okhttp3:okhttp:4.9.3") // For HTTP requests
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+    implementation("net.coobird:thumbnailator:0.4.14") // For image resizing
+    implementation("org.json:json:20220320") // For JSON parsing and building
+    implementation("net.coobird:thumbnailator:0.4.14") // Thumbnailator for image resizing
 }
 
 kotlin {

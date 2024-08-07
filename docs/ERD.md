@@ -40,7 +40,6 @@
 - **glass**: Int
 - **cardboard_paper**: Int
 - **food_scraps**: Int
-- **organic_yard_waste**: Int
 - **other**: Int
 - **created_at**: ZonedDateTime
 - **updated_at**: ZonedDateTime

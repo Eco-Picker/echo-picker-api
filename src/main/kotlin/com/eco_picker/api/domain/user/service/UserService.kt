@@ -33,8 +33,7 @@ class UserService(
         "glass" to 3,
         "cardboard_paper" to 4,
         "food_scraps" to 5,
-        "organic_yard_waste" to 6,
-        "other" to 7
+        "other" to 6
     )
 
     fun getInfo(userId: Long): UserInfo {
@@ -128,7 +127,7 @@ class UserService(
             // Total count from garbage_monthly
             val monthlyData = garbageMonthlyRepository.findByUserId(userId)
             val totalCount = monthlyData.sumOf {
-                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.organicYardWaste + it.other
+                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.other
             }
 
             // Total daily count from garbage
@@ -137,13 +136,13 @@ class UserService(
             // Total weekly count from garbage_weekly
             val weeklyData = garbageWeeklyRepository.findByUserIdAndCollectedWeek(userId, currentWeek)
             val totalWeeklyCount = weeklyData.sumOf {
-                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.organicYardWaste + it.other
+                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.other
             }
 
             // Total monthly count from garbage_monthly for current month
             val currentMonthlyData = garbageMonthlyRepository.findByUserIdAndCollectedMonth(userId, currentMonth)
             val totalMonthlyCount = currentMonthlyData?.let {
-                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.organicYardWaste + it.other
+                it.plastic + it.metal + it.glass + it.cardboardPaper + it.foodScraps + it.other
             } ?: 0
 
             // Calculate totals for each garbage category
@@ -153,7 +152,6 @@ class UserService(
             val totalOther = monthlyData.sumOf { it.other }
             val totalMetal = monthlyData.sumOf { it.metal }
             val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
-            val totalOrganicYardWaste = monthlyData.sumOf { it.organicYardWaste }
 
             // Calculate scores for each garbage category
             val cardboardPaperScore = totalCardboardPaper * garbageScoreTable["cardboard_paper"]!!
@@ -162,10 +160,9 @@ class UserService(
             val otherScore = totalOther * garbageScoreTable["other"]!!
             val metalScore = totalMetal * garbageScoreTable["metal"]!!
             val foodScrapsScore = totalFoodScraps * garbageScoreTable["food_scraps"]!!
-            val organicYardWasteScore = totalOrganicYardWaste * garbageScoreTable["organic_yard_waste"]!!
 
             // Calculate the total score
-            val totalScore = cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore + organicYardWasteScore
+            val totalScore = cardboardPaperScore + plasticScore + glassScore + otherScore + metalScore + foodScrapsScore
 
             response.userStatistics = UserStatisticsResponse.UserStatistics(
                 count = UserStatisticsResponse.Count(
@@ -178,8 +175,7 @@ class UserService(
                     totalGlass = totalGlass,
                     totalOther = totalOther,
                     totalMetal = totalMetal,
-                    totalFoodScraps = totalFoodScraps,
-                    totalOrganicYardWaste = totalOrganicYardWaste
+                    totalFoodScraps = totalFoodScraps
                 ),
                 score = UserStatisticsResponse.Score(
                     totalScore = totalScore,
@@ -188,8 +184,7 @@ class UserService(
                     glassScore = glassScore,
                     otherScore = otherScore,
                     metalScore = metalScore,
-                    foodScrapsScore = foodScrapsScore,
-                    organicYardWasteScore = organicYardWasteScore
+                    foodScrapsScore = foodScrapsScore
                 ),
                 username = UserStatisticsResponse.UserName(
                     userName = userName

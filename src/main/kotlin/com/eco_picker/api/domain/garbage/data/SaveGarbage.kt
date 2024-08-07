@@ -4,10 +4,7 @@ import com.eco_picker.api.domain.garbage.constant.GarbageCategory
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.ZonedDateTime
 
-data class Garbage(
-    @field:Schema(description = "garbage ID (PK)", required = false)
-    val id: Long? = null,
-
+data class SaveGarbage(
     @field:Schema(description = "User ID", required = true)
     val userId: Long,
 

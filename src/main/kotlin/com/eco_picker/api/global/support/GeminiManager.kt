@@ -4,9 +4,74 @@ import com.eco_picker.api.domain.newsletter.constant.NewsletterCategory
 import com.eco_picker.api.domain.newsletter.data.Newsletter
 import org.springframework.stereotype.Component
 import java.time.ZonedDateTime
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.springframework.beans.factory.annotation.Value
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Base64
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+data class GeminiResponse(val name: String, val category: String)
+
+private val logger = KotlinLogging.logger {}
 
 @Component
 class GeminiManager {
+
+    @Value("\${gemini.app-key}")
+    private lateinit var apiKey: String
+
+    private val client = OkHttpClient()
+    private val mapper = jacksonObjectMapper()
+
+    fun analyzeImage(base64Image: String): GeminiResponse? {
+        val requestJson = """
+            {
+              "contents": [
+                {
+                  "parts": [
+                    {"text": "This photo was taken by a user of our service who picked up this garbage. Please analyze the photo and provide two pieces of information: 1) Identify the name of the garbage. 2) Choose the garbage category from these 6 options: PLASTIC, METAL, GLASS, CARDBOARD_PAPER, FOOD_SCRAPS, OTHER."},
+                    {
+                      "inline_data": {
+                        "mime_type": "image/jpeg",
+                        "data": "$base64Image"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+
+        val requestBody: RequestBody = requestJson.toRequestBody("application/json".toMediaTypeOrNull())
+        val request = Request.Builder()
+            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey")
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw RuntimeException("Unexpected code $response")
+
+            val responseBody = response.body?.string()
+            val responseJson = mapper.readTree(responseBody)
+            val textParts = responseJson["candidates"]?.get(0)?.get("content")?.get("parts")?.get(0)?.get("text")?.asText()?.split("\n")
+
+            if (textParts != null && textParts.size >= 2) {
+                val name = textParts[0].substringAfter(") ")
+                val category = textParts[1].substringAfter(") ")
+                return GeminiResponse(name, category)
+            }
+        }
+        return null
+    }
+
+
     fun generateNewsletter(category: NewsletterCategory): Newsletter {
         /*
         prompt 예시
@@ -52,7 +117,7 @@ class GeminiManager {
         )
     }
 
-    fun analyzeImage(): String {
-        return "result"
-    }
+//    fun analyzeImage(): String {
+//        return "result"
+//    }
 }
