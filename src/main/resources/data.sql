@@ -1,13 +1,15 @@
 TRUNCATE TABLE garbage;
-INSERT INTO garbage (user_id, id, garbage_name, category, latitude, longitude, collected_at, created_at, updated_at)
-VALUES (1, 1, 'Plastic bottle', 'PLASTIC', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null),
-       (1, 2, 'Aluminum can', 'METAL', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null),
-       (1, 3, 'Glass jar', 'GLASS', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null),
-       (1, 4, 'Cardboard box', 'CARDBOARD_PAPER', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(),
-        null),
-       (1, 5, 'Apple core', 'FOOD_SCRAPS', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null),
-       (1, 6, 'Broken ceramic plate', 'OTHER', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(),
-        null);
+--INSERT INTO garbage (user_id, id, `name`, category, latitude, longitude, collected_at, created_at, updated_at, memo)
+--VALUES (1, 1, 'Plastic bottle', 'PLASTIC', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null,
+--        null),
+--       (1, 2, 'Aluminum can', 'METAL', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null, null),
+--       (1, 3, 'Glass jar', 'GLASS', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null, null),
+--       (1, 4, 'Cardboard box', 'CARDBOARD_PAPER', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(),
+--        null, null),
+--       (1, 5, 'Apple core', 'FOOD_SCRAPS', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(), null,
+--        null),
+--       (1, 6, 'Broken ceramic plate', 'OTHER', 43.69087654257335, -79.42937900697125, '2023-10-27 00:00:00', NOW(),
+--        null, null);
 TRUNCATE TABLE newsletter;
 INSERT INTO newsletter (title, content, source, category, published_at, created_at, updated_at)
 VALUES ('Canada Announces New Recycling Targets',

@@ -12,6 +12,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
@@ -121,7 +122,7 @@ class UserService(
             val userName = userEntity.username
 
             val now = ZonedDateTime.now()
-            val currentMonth = now.format(DateTimeFormatter.ofPattern("yyyyMM"))
+            val currentMonth = now.format(DateTimeFormatter.ofPattern("yyyy-MM"))
             val currentWeek = now.get(WeekFields.of(Locale.getDefault()).weekOfYear())
 
             // Total count from garbage_monthly
@@ -131,7 +132,10 @@ class UserService(
             }
 
             // Total daily count from garbage
-            val totalDailyCount = garbageRepository.countByUserIdAndCollectedAt(userId)
+            val startOfDay = now.withZoneSameInstant(ZoneOffset.UTC).toLocalDate().atStartOfDay(ZoneOffset.UTC)
+            val endOfDay = startOfDay.plusDays(1)
+            val totalDailyCount = garbageRepository.countByUserIdAndCollectedAt(userId, startOfDay, endOfDay)
+
 
             // Total weekly count from garbage_weekly
             val weeklyData = garbageWeeklyRepository.findByUserIdAndCollectedWeek(userId, currentWeek)
@@ -185,9 +189,6 @@ class UserService(
                     otherScore = otherScore,
                     metalScore = metalScore,
                     foodScrapsScore = foodScrapsScore
-                ),
-                username = UserStatisticsResponse.UserName(
-                    userName = userName
                 )
             )
             response.result = true

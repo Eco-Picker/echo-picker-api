@@ -105,12 +105,12 @@ class GarbageService(
     }
 
     @Transactional
-    fun saveGarbage(garbage: SaveGarbage): Boolean {
+    fun saveGarbage(garbage: SaveGarbage, userId: Long): Boolean {
         try {
             logger.debug { "_________-------------------_________________Saving garbage with name: ${garbage.name}" }
 
             val garbageEntity = GarbageEntity(
-                userId = garbage.userId,
+                userId = userId,
                 name = garbage.name,
                 category = garbage.category,
                 latitude = garbage.latitude,

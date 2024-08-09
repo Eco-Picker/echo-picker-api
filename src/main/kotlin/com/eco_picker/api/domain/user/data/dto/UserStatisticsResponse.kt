@@ -12,8 +12,7 @@ class UserStatisticsResponse : BaseResponse<UserStatisticsResponse.Code>() {
 
     data class UserStatistics(
         val count: Count,
-        val score: Score,
-        val username: UserName
+        val score: Score
     )
 
     data class Count(
@@ -37,9 +36,5 @@ class UserStatisticsResponse : BaseResponse<UserStatisticsResponse.Code>() {
         val otherScore: Int,
         val metalScore: Int,
         val foodScrapsScore: Int,
-    )
-
-    data class UserName(
-        val userName: String
     )
 }

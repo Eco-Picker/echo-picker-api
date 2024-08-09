@@ -55,7 +55,7 @@ class GarbageController(private val garbageService: GarbageService) {
         security = [SecurityRequirement(name = JWT)],
         summary = "Analyze an image"
     )
-    @PostMapping("/analyze", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/garbage/analyze", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun analyzeGarbage(
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestPart("file") file: MultipartFile
@@ -102,13 +102,13 @@ class GarbageController(private val garbageService: GarbageService) {
         security = [SecurityRequirement(name = JWT)],
         summary = "Save garbage data"
     )
-    @PostMapping("/save", consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping("/garbage/save", consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun saveGarbage(
         @AuthenticationPrincipal principal: UserPrincipal,
         @RequestBody saveGarbageRequest: SaveGarbageRequest
     ): SaveGarbageResponse {
-        val garbage = saveGarbageRequest.garbage.copy(userId = principal.id)
-        val saveResult = garbageService.saveGarbage(garbage)
+        val garbage = saveGarbageRequest.garbage
+        val saveResult = garbageService.saveGarbage(garbage, principal.id)
 
         return SaveGarbageResponse(
             garbage = if (saveResult) garbage else null
