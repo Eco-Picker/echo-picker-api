@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param
 interface GarbageWeeklyRepository : JpaRepository<GarbageWeeklyEntity, Long> {
     fun findByUserIdAndCollectedWeek(userId: Long, collectedWeek: Int): List<GarbageWeeklyEntity>
 
-    @Query("SELECT g FROM GarbageWeeklyEntity g WHERE g.userId = :userId AND g.collectedWeek = :collectedWeek")
-    fun findOneByUserIdAndCollectedWeek(@Param("userId") userId: Long, @Param("collectedWeek") collectedWeek: Int): GarbageWeeklyEntity?
+    @Query("SELECT g FROM GarbageWeeklyEntity g WHERE g.userId = :userId AND g.collectedWeek = :collectedWeek AND g.collectedYear = :collectedYear")
+    fun findOneByUserIdAndCollectedWeekAndCollectedYear(userId: Long, collectedWeek: Int, collectedYear: Int): GarbageWeeklyEntity?
 }

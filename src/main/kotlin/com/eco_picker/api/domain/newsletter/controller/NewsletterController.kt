@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.time.ZonedDateTime
 
 @RestController
 class NewsletterController(private val newsletterService: NewsletterService) {
@@ -68,4 +69,32 @@ class NewsletterController(private val newsletterService: NewsletterService) {
         }
     }
 
+    @Operation(
+        tags = [OperationTag.NEWSLETTER],
+        security = [SecurityRequirement(name = JWT)],
+        summary = "Generate newsletters",
+    )
+    @PostMapping("/generate_newsletters")
+    fun generateNewsletters(
+        @RequestParam category: String,
+        @RequestParam n: Int
+    ): Map<String, Any> {
+        return try {
+            val newsletterCategory = NewsletterCategory.valueOf(category.uppercase())
+            val generatedNewsletters = newsletterService.generateNewsletter(newsletterCategory, n)
+            mapOf(
+                "result" to true,
+                "timestamp" to ZonedDateTime.now(),
+                "generatedCount" to generatedNewsletters.size,
+                "newsletters" to generatedNewsletters
+            )
+        } catch (e: Exception) {
+            mapOf(
+                "result" to false,
+                "message" to "Failed to generate newsletters: ${e.message}",
+                "code" to "GENERATION_ERROR",
+                "timestamp" to ZonedDateTime.now()
+            )
+        }
+    }
 }

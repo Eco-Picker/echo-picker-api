@@ -21,24 +21,51 @@ class NewsletterService(
 ) {
     private val logger = KotlinLogging.logger { }
 
-    // comment out - just to pass gradlew build for now (> just return)
-    fun generateNewsletter(category: NewsletterCategory) {
+    private val garbageScoreTable = mapOf(
+        "plastic" to 1,
+        "metal" to 2,
+        "glass" to 3,
+        "cardboard_paper" to 4,
+        "food_scraps" to 5,
+        "other" to 6
+    )
+
+    // Update the function to correctly capture and return newsletters
+    fun generateNewsletter(category: NewsletterCategory, n: Int): List<Newsletter> {
+        val generatedNewsletters = mutableListOf<Newsletter>()
         try {
-            return
-            logger.debug { "Generating news letter for category $category" }
-            val newsletter = this.geminiManager.generateNewsletter(category = category)
-            newsletterRepository.save(
-                NewsletterEntity(
-                    title = newsletter.title,
-                    content = newsletter.content,
-                    source = newsletter.source,
-                    category = category,
-                    publishedAt = newsletter.publishedAt
+            logger.debug { "Generating newsletter for category $category" }
+
+            // Generate newsletters using the GeminiManager
+            val newsletters = this.geminiManager.generateNewsletter(category = category, n = n)
+
+            // Save each generated newsletter and capture it in the list
+            newsletters.forEach { newsletter ->
+                val savedNewsletter = newsletterRepository.save(
+                    NewsletterEntity(
+                        title = newsletter.title,
+                        content = newsletter.content,
+                        source = newsletter.source,
+                        category = category,
+                        publishedAt = newsletter.publishedAt
+                    )
                 )
-            )
+                // Add the saved newsletter to the list with the database-generated ID
+                generatedNewsletters.add(
+                    Newsletter(
+                        id = savedNewsletter.id!!,  // Ensure the ID from DB is captured
+                        title = savedNewsletter.title,
+                        content = savedNewsletter.content,
+                        category = savedNewsletter.category,
+                        source = savedNewsletter.source,
+                        publishedAt = savedNewsletter.publishedAt
+                    )
+                )
+            }
         } catch (e: Exception) {
-            logger.error(e) { "Failed to generate newsletter" }
+            logger.error(e) { "Failed to generate newsletters" }
         }
+        return generatedNewsletters
     }
 
     fun getRandomNewsletterSummary(): NewsletterSummary? {

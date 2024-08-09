@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 
 data class Newsletter(
     @field:Schema(description = "newsletter ID (PK)", required = true)
-    val id: Long,
+    val id: Long? = null,
 
     @field:Schema(description = "title", required = true)
     val title: String,

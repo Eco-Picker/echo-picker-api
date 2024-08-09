@@ -14,6 +14,9 @@ data class GarbageWeeklyEntity(
     @Column(name = "user_id", nullable = false)
     val userId: Long,
 
+    @Column(name = "collected_year", nullable = false)
+    val collectedYear: Int,
+
     @Column(name = "collected_week", nullable = false)
     val collectedWeek: Int,
 

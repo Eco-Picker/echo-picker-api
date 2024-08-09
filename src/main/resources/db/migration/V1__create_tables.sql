@@ -47,6 +47,7 @@ CREATE TABLE garbage_monthly (
 CREATE TABLE garbage_weekly (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    collected_year INT,
     collected_week INT,
     plastic INT,
     metal INT,

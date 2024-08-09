@@ -33,6 +33,15 @@ class GarbageService(
 ) {
     private val logger = KotlinLogging.logger { }
 
+    private val garbageScoreTable = mapOf(
+        "plastic" to 1,
+        "metal" to 2,
+        "glass" to 3,
+        "cardboard_paper" to 4,
+        "food_scraps" to 5,
+        "other" to 6
+    )
+
     fun analyzeImage(userId: Long, file: MultipartFile): GeminiGarbage? {
         logger.debug { "FILE FROM FRONTEND: '${file}'" }
         // Resize the image
@@ -135,34 +144,35 @@ class GarbageService(
 
     private fun updateGarbageWeekly(garbageEntity: GarbageEntity) {
         val weekOfYear = garbageEntity.collectedAt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
-        logger.debug { "This is week of year!!!!!!!!!!!!!!!!: ${weekOfYear}" }
-        val weeklyEntity = garbageWeeklyRepository.findOneByUserIdAndCollectedWeek(garbageEntity.userId, weekOfYear)
-            ?: GarbageWeeklyEntity(
-                userId = garbageEntity.userId,
-                collectedWeek = weekOfYear,
-                createdAt = ZonedDateTime.now()
-            )
-
+        val year = garbageEntity.collectedAt.year
+        val weeklyEntity = garbageWeeklyRepository.findOneByUserIdAndCollectedWeekAndCollectedYear(
+            garbageEntity.userId,
+            weekOfYear,
+            year
+        ) ?: GarbageWeeklyEntity(
+            userId = garbageEntity.userId,
+            collectedWeek = weekOfYear,
+            collectedYear = year,
+            createdAt = ZonedDateTime.now()
+        )
         incrementCategoryCount(weeklyEntity, garbageEntity.category)
-
-        weeklyEntity.totalScore += 1
+        val scoreToAdd = garbageScoreTable[garbageEntity.category.name.lowercase()] ?: 0
+        weeklyEntity.totalScore += scoreToAdd
         weeklyEntity.updatedAt = ZonedDateTime.now()
         garbageWeeklyRepository.save(weeklyEntity)
     }
 
     private fun updateGarbageMonthly(garbageEntity: GarbageEntity) {
         val month = garbageEntity.collectedAt.format(DateTimeFormatter.ofPattern("yyyy-MM"))
-
         val monthlyEntity = garbageMonthlyRepository.findByUserIdAndCollectedMonth(garbageEntity.userId, month)
             ?: GarbageMonthlyEntity(
                 userId = garbageEntity.userId,
                 collectedMonth = month,
                 createdAt = ZonedDateTime.now()
             )
-
         incrementCategoryCount(monthlyEntity, garbageEntity.category)
-
-        monthlyEntity.totalScore += 1
+        val scoreToAdd = garbageScoreTable[garbageEntity.category.name.lowercase()] ?: 0
+        monthlyEntity.totalScore += scoreToAdd
         monthlyEntity.updatedAt = ZonedDateTime.now()
         garbageMonthlyRepository.save(monthlyEntity)
     }
