@@ -29,12 +29,12 @@ class UserService(
     private val logger = KotlinLogging.logger { }
 
     private val garbageScoreTable = mapOf(
-        "plastic" to 1,
-        "metal" to 2,
-        "glass" to 3,
-        "cardboard_paper" to 4,
-        "food_scraps" to 5,
-        "other" to 6
+        "plastic" to 6,
+        "metal" to 5,
+        "glass" to 4,
+        "cardboard_paper" to 3,
+        "food_scraps" to 2,
+        "other" to 1
     )
 
     fun getInfo(userId: Long): UserInfo {
