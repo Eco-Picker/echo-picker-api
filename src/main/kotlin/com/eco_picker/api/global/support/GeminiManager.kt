@@ -2,21 +2,18 @@ package com.eco_picker.api.global.support
 
 import com.eco_picker.api.domain.newsletter.constant.NewsletterCategory
 import com.eco_picker.api.domain.newsletter.data.Newsletter
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component
-import java.time.ZonedDateTime
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Value
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.Base64
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 data class GeminiResponse(val name: String, val category: String)
@@ -32,46 +29,6 @@ class GeminiManager {
     private val client = OkHttpClient()
     private val mapper = jacksonObjectMapper()
 
-//    fun analyzeImage(base64Image: String): GeminiResponse? {
-//        val requestJson = """
-//            {
-//              "contents": [
-//                {
-//                  "parts": [
-//                    {"text": "This photo was taken by a user of our service who picked up this garbage. Please analyze the photo and provide two pieces of information: 1) Identify the name of the garbage. 2) Choose the garbage category from these 6 options: PLASTIC, METAL, GLASS, CARDBOARD_PAPER, FOOD_SCRAPS, OTHER."},
-//                    {
-//                      "inline_data": {
-//                        "mime_type": "image/jpeg",
-//                        "data": "$base64Image"
-//                      }
-//                    }
-//                  ]
-//                }
-//              ]
-//            }
-//        """.trimIndent()
-//
-//        val requestBody: RequestBody = requestJson.toRequestBody("application/json".toMediaTypeOrNull())
-//        val request = Request.Builder()
-//            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey")
-//            .post(requestBody)
-//            .build()
-//
-//        client.newCall(request).execute().use { response ->
-//            if (!response.isSuccessful) throw RuntimeException("Unexpected code $response")
-//
-//            val responseBody = response.body?.string()
-//            val responseJson = mapper.readTree(responseBody)
-//            val textParts = responseJson["candidates"]?.get(0)?.get("content")?.get("parts")?.get(0)?.get("text")?.asText()?.split("\n")
-//
-//            if (textParts != null && textParts.size >= 2) {
-//                val name = textParts[0].substringAfter(") ")
-//                val category = textParts[1].substringAfter(") ")
-//                return GeminiResponse(name, category)
-//            }
-//        }
-//        return null
-//    }
     fun analyzeImage(base64Image: String): GeminiResponse? {
         val requestJson = """
             {
@@ -118,61 +75,77 @@ class GeminiManager {
         return null
     }
 
-
     fun generateNewsletter(category: NewsletterCategory, n: Int): List<Newsletter> {
         val promptText = when (category) {
             NewsletterCategory.NEWS -> """
-        Provide the latest news related to recycling and the environment, focusing on recent developments, policy changes, scientific advancements, and environmental impacts. Format the information as specified below, and provide a total of $n entries.
+            Provide the latest news related to recycling and the environment, focusing on recent developments, policy changes, scientific advancements, and environmental impacts.
+            
+            **Important Requirements:**
+            - Only return real and verifiable news with valid URLs that are currently accessible.
+            - Do not generate or fabricate news or sources.
+            - Ensure that the URLs provided link to live pages with actual news details.
+            - If a verifiable source cannot be found, return a null value for that entry instead.
+            - Format the `publishedAt` field in the JSON output as "yyyy-MM-dd HH:mm:ss". If the time is not available, use "00:00:00".
+            
+            The following information should be in JSON format:
+            
+            {"title": "must be 40 characters or less", "content": "must be 500 characters or less", "category": "NEWS", "publishedAt": "format: yyyy-MM-dd HH:mm:ss", "source": "must be a valid, live link; do not generate or fabricate sources"}
+            
+            Provide $n entries based on the latest available information as of today.
+            """.trimIndent()
 
-        **IMPORTANT:** Adhere to the character limits strictly.
-        - title: (must be 40 characters or less)
-        - content: (must be 500 characters or less)
-        - category: "NEWS"
-        - publishedAt: The date of creation from the source (e.g., "2023-10-27 15:30:40")
-        - source: URL of the source
-
-        Ensure all information is the latest available as of today and is based on Canada or USA. Provide only information with clear sources; do not generate or fabricate sources. All fields are mandatory.
-    """.trimIndent()
 
             NewsletterCategory.EDUCATION -> """
-        Provide educational content related to recycling and the environment, including guides, tutorials, informative articles, and best practices. Examples may include recycling tips, environmental impact studies, and sustainability practices. Format the information as specified below, and provide a total of $n entries.
+            Provide educational content related to recycling and the environment, such as guides, tutorials, informative articles, and best practices. Examples may include recycling tips, environmental impact studies, and sustainability practices.
+            
+            **Important Requirements:**
+            - Only return real and verifiable content with valid URLs that are currently accessible.
+            - Do not generate or fabricate content or sources.
+            - Ensure that the URLs provided link to live pages with actual educational content.
+            - If a verifiable source cannot be found, return a null value for that entry instead.
+            - Format the `publishedAt` field in the JSON output as "yyyy-MM-dd HH:mm:ss". If the time is not available, use "00:00:00".
+            
+            The following information should be in JSON format:
+            
+            {"title": "must be 40 characters or less", "content": "must be 500 characters or less", "category": "EDUCATION", "publishedAt": "format: yyyy-MM-dd HH:mm:ss", "source": "must be a valid, live link; do not generate or fabricate sources"}
+            
+            Provide $n entries based on the latest available information as of today.
+            """.trimIndent()
 
-        **IMPORTANT:** Adhere to the character limits strictly.
-        - title: (must be 40 characters or less)
-        - content: (must be 500 characters or less)
-        - category: "EDUCATION"
-        - publishedAt: The date of creation from the source (e.g., "2023-10-27 15:30:40")
-        - source: URL of the source
-
-        Ensure all information is the latest available as of today and is based on Canada or USA. Provide only information with clear sources; do not generate or fabricate sources. All fields are mandatory.
-    """.trimIndent()
 
             NewsletterCategory.EVENT -> """
-        Provide information on online or offline events happening in the future that individuals, families, or friends can participate in, related to recycling and the environment. Examples include community cleanup events, recycling workshops, webinars, and environmental fairs. Format the information as specified below, and provide a total of $n entries.
+        Provide information on upcoming online or offline events in the USA or Canada related to recycling, environmental protection, or up-cycling that individuals, families, or friends can participate in. These should include community cleanup events, recycling workshops, webinars, and environmental fairs.
 
-        **IMPORTANT:** Adhere to the character limits strictly.
-        - title: (must be 40 characters or less)
-        - content: (must be 500 characters or less)
-        - category: "EVENTS"
-        - publishedAt: The date of creation from the source (e.g., data form: "2023-10-27 15:30:40"). If you cannot find published date, just return null for this field.
-        - source: URL of the source
+        **Important Requirements:**
+        - Only return real and verifiable events with valid URLs that are currently accessible.
+        - Do not generate or fabricate events or sources.
+        - Ensure that the URLs provided link to live pages with actual event details.
+        - If a verifiable event cannot be found, return a null value for that entry instead.
+        - The following information should be in JSON format:
 
-        Ensure all information is the latest available as of today and is based on Canada or USA. Provide only information with clear sources; do not generate or fabricate sources. All fields are mandatory.
+        {"title": "must be 40 characters or less", "content": "must be 500 characters or less", "category": "EVENT", "publishedAt": "format: yyyy-MM-dd HH:mm:ss (time is optional)", "source": "must be a valid, live link; do not generate or fabricate sources"}
+
+        Provide $n entries based on the latest available information as of today.
     """.trimIndent()
         }
 
+        logger.debug { "Prompt text: $promptText" }
 
         val requestJson = """
+    {
+      "contents": [
         {
-          "contents": [
+          "parts": [
             {
-              "parts": [
-                {"text": "$promptText"}
-              ]
+              "text": ${mapper.writeValueAsString(promptText)}
             }
           ]
         }
+      ]
+    }
     """.trimIndent()
+
+        logger.debug { "Request JSON: $requestJson" }
 
         val requestBody = requestJson.toRequestBody("application/json".toMediaTypeOrNull())
         val request = Request.Builder()
@@ -181,35 +154,67 @@ class GeminiManager {
             .build()
 
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw RuntimeException("Unexpected code $response")
-
             val responseBody = response.body?.string()
+
+            logger.debug { "Response code: ${response.code}" }
+            logger.debug { "Response body: $responseBody" }
+
+            if (!response.isSuccessful) {
+                logger.error { "Request failed with code: ${response.code}" }
+                throw RuntimeException("Unexpected code $response")
+            }
+
             val responseJson = mapper.readTree(responseBody)
+            logger.debug { "Response JSON: $responseJson" }
+
             val newsletterList = mutableListOf<Newsletter>()
 
             responseJson["candidates"]?.forEach { candidate ->
                 val parts = candidate["content"]?.get("parts")
                 parts?.forEach { part ->
-                    val textParts = part["text"]?.asText()?.split("\n")
-                    if (textParts != null && textParts.size >= 5) {
-                        val title = textParts[0].substringAfter(": ")
-                        val content = textParts[1].substringAfter(": ")
-                        val categoryStr = textParts[2].substringAfter(": ")
-                        val publishedAtStr = textParts[3].substringAfter(": ")
-                        val source = textParts[4].substringAfter(": ")
+                    val text = part["text"]?.asText()?.trim()
+                    val jsonData = text?.substringAfter("```json")?.substringBefore("```")
 
-                        val publishedAt =
-                            ZonedDateTime.parse(publishedAtStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    if (jsonData != null && jsonData.isNotBlank()) {
+                        try {
+                            val newsletters: List<Map<String, String>> = mapper.readValue(jsonData)
+                            newsletters.forEach { entry ->
+                                val title = entry["title"]
+                                val content = entry["content"]
+                                val categoryStr = entry["category"]
+                                val publishedAtStr = entry["publishedAt"]
+                                val source = entry["source"]
 
-                        val newsletter = Newsletter(
-                            title = title,
-                            content = content,
-                            category = NewsletterCategory.valueOf(categoryStr),
-                            source = source,
-                            publishedAt = publishedAt
-                        )
+                                val publishedAt = try {
+                                    publishedAtStr?.let {
+                                        LocalDateTime.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                                    }
+                                } catch (e: Exception) {
+                                    logger.error { "Failed to parse date: $publishedAtStr" }
+                                    null
+                                }
 
-                        newsletterList.add(newsletter)
+                                if (title != null && content != null && categoryStr != null && source != null) {
+                                    val newsletter = publishedAt?.atZone(ZoneId.systemDefault())?.let {
+                                        Newsletter(
+                                            title = title,
+                                            content = content,
+                                            category = NewsletterCategory.valueOf(categoryStr),
+                                            source = source,
+                                            publishedAt = it
+                                        )
+                                    }
+                                    logger.debug { "Successfully added newsletter: $title" }
+                                    if (newsletter != null) {
+                                        newsletterList.add(newsletter)
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            logger.error { "Failed to parse JSON: $jsonData" }
+                        }
+                    } else {
+                        logger.debug { "No valid JSON data found." }
                     }
                 }
             }

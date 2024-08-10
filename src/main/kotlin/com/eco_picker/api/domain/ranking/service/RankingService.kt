@@ -29,7 +29,7 @@ class RankingService(
 
     fun getRanking(offset: Int, limit: Int): GeneralRanking {
         return try {
-            val allUsers = userRepository.findAll() 
+            val allUsers = userRepository.findAll()
 
             val rankers = allUsers.mapNotNull { user ->
                 val userId = user.id ?: return@mapNotNull null
@@ -66,9 +66,6 @@ class RankingService(
             )
         }
     }
-
-
-
 
     fun getRankerDetail(userId: Long): Ranker? {
         return try {
