@@ -1,15 +1,13 @@
 package com.eco_picker.api.domain.ranking.service
 
-import com.eco_picker.api.domain.garbage.data.entity.GarbageMonthlyEntity
 import com.eco_picker.api.domain.garbage.repository.GarbageMonthlyRepository
-import com.eco_picker.api.domain.ranking.data.GeneralRanker
 import com.eco_picker.api.domain.ranking.data.GeneralRanking
+import com.eco_picker.api.domain.ranking.data.GeneralRanker
 import com.eco_picker.api.domain.ranking.data.Ranker
 import com.eco_picker.api.domain.ranking.data.dto.RankerStatisticsResponse
 import com.eco_picker.api.domain.user.repository.UserRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.persistence.EntityNotFoundException
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 
@@ -31,28 +29,46 @@ class RankingService(
 
     fun getRanking(offset: Int, limit: Int): GeneralRanking {
         return try {
-            // @todo pageable 로직 변경되었으니 추후 getNewsletterSummaries 쪽 소스 참조해주세요.
-            val pageable = PageRequest.of(offset, limit)
-            val users = userRepository.findAll(pageable)
+            val allUsers = userRepository.findAll() 
 
-            val rankers = users.mapNotNull { user ->
-                val userId = user.id ?: return@mapNotNull null // Skip users with null IDs
+            val rankers = allUsers.mapNotNull { user ->
+                val userId = user.id ?: return@mapNotNull null
                 val monthlyData = garbageMonthlyRepository.findByUserId(userId)
-                val totalScore = calculateTotalScore(monthlyData)
+                val totalScore = monthlyData.sumOf { it.totalScore }
 
                 GeneralRanker(
                     id = userId,
                     username = user.username,
                     point = totalScore
                 )
-            }.sortedByDescending { it.point }
+            }.sortedWith(compareByDescending<GeneralRanker> { it.point }
+                .thenByDescending { it.id })
 
-            GeneralRanking(rankers = rankers)
+            val pagedRankers = rankers.drop(offset).take(limit) // 페이징 처리
+
+            val currentPage = (offset / limit) + 1
+            val totalItems = rankers.size.toLong()
+            val totalPages = (totalItems + limit - 1) / limit
+
+            return GeneralRanking(
+                currentPage = currentPage,
+                totalItems = totalItems,
+                totalPages = totalPages.toInt(),
+                rankers = pagedRankers
+            )
         } catch (e: Exception) {
             logger.error(e) { "Failed to get ranking with offset: $offset, limit: $limit" }
-            throw e
+            return GeneralRanking(
+                currentPage = 0,
+                totalItems = 0,
+                totalPages = 0,
+                rankers = emptyList()
+            )
         }
     }
+
+
+
 
     fun getRankerDetail(userId: Long): Ranker? {
         return try {
@@ -114,21 +130,5 @@ class RankingService(
                 foodScrapsScore = foodScrapsScore
             )
         )
-    }
-
-    private fun calculateTotalScore(monthlyData: List<GarbageMonthlyEntity>): Int {
-        val totalCardboardPaper = monthlyData.sumOf { it.cardboardPaper }
-        val totalPlastic = monthlyData.sumOf { it.plastic }
-        val totalGlass = monthlyData.sumOf { it.glass }
-        val totalOther = monthlyData.sumOf { it.other }
-        val totalMetal = monthlyData.sumOf { it.metal }
-        val totalFoodScraps = monthlyData.sumOf { it.foodScraps }
-
-        return totalCardboardPaper * garbageScoreTable["cardboard_paper"]!! +
-                totalPlastic * garbageScoreTable["plastic"]!! +
-                totalGlass * garbageScoreTable["glass"]!! +
-                totalOther * garbageScoreTable["other"]!! +
-                totalMetal * garbageScoreTable["metal"]!! +
-                totalFoodScraps * garbageScoreTable["food_scraps"]!!
     }
 }
