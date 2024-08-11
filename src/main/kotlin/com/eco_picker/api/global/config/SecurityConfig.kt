@@ -44,18 +44,19 @@ class SecurityConfig() {
         return http.build()
     }
 
-
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("*") // @todo front 도메인 확정나면 제한
+        configuration.allowedOrigins = listOf("https://eco-picker.com") // production 도메인 명시
         configuration.allowedMethods = listOf("GET", "POST", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
+        configuration.allowCredentials = true // 인증 정보를 포함한 요청 허용
         configuration.maxAge = 3600L
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
+
 
     @Bean
     fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
