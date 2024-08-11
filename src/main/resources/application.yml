@@ -69,6 +69,8 @@ gemini:
   app-key: AIzaSyCNQkY2V5paPLsS_DxX5nn5K0UrYPdXb6Q
 
 logging:
+  file:
+    path: /var/log/eco-picker/
   level:
     root: INFO`
     com.eco_picker: DEBUG
