@@ -44,8 +44,7 @@ class RankingService(
             }.sortedWith(compareByDescending<GeneralRanker> { it.point }
                 .thenByDescending { it.id })
 
-            val pagedRankers = rankers.drop(offset).take(limit) // 페이징 처리
-
+            val pagedRankers = rankers.drop(offset).take(limit)
             val currentPage = (offset / limit) + 1
             val totalItems = rankers.size.toLong()
             val totalPages = (totalItems + limit - 1) / limit
