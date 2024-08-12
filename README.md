@@ -6,7 +6,7 @@
 - Gradle
 - IDE (IntelliJ IDEA recommended)
 
-B## Getting Started
+## Getting Started
 
 ### git clone
 
@@ -58,11 +58,3 @@ For any questions or feedback, please contact
 
 - [jerry2219398\@gmail.com](mailto:jerry2219398@gmail.com?subject=ecopicker)
 - [jsunwoo0977\@gmail.com](mailto:jsunwoo0977@gmail.com?subject=ecopicker)
-
-### TODO
-
-- [ ] encrypt/decrypt properties
-- [ ] set up logging
-- [ ] images - s3, local, etc
-- [ ] locations - map
-- [ ] version check 
