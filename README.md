@@ -20,6 +20,14 @@ cd eco-picker-api
 ```shell
 cp .env.example .env
 ```
+After copying, you need to update the .env file with your specific credentials. Particularly, ensure that the following section is properly configured:
+
+```shell
+GEMINI_APP_KEY={GEMINI_APP_KEY}
+```
+For the GEMINI_APP_KEY, please contact us at jsunwoo0977@gmail.com to request the appropriate key. Alternatively, if you already possess a Gemini API key, you can input it directly in the .env file.
+
+Make sure that your .env file is correctly updated before proceeding with the setup.
 
 ### build
 
