@@ -72,7 +72,7 @@ docker-compose up -d
 > The following diagram illustrates the infrastructure setup for the application, including the integration with
 > Cloudflare, GCP, AWS, and external APIs:
 
-![Infrastructure Architecture](src/main/resources/static/infra-architecture.png)
+![Infrastructure Architecture](src/main/resources/static/Infra-architecture.png)
 
 ### CI/CD Architecture
 
