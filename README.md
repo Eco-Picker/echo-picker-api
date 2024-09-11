@@ -20,14 +20,18 @@ cd eco-picker-api
 ```shell
 cp .env.example .env
 ```
-After copying, you need to update the .env file with your specific credentials. Particularly, ensure that the following section is properly configured:
+
+After copying, you need to update the .env file with your specific credentials.
+Particularly, ensure that the following section is properly configured:
 
 ```shell
 GEMINI_APP_KEY={GEMINI_APP_KEY}
+SMTP_USERNAME={SMTP_USERNAME}
+SMTP_PASSWORD={SMTP_PASSWORD}
+DB_URL={DB_URL}
+DB_USERNAME={DB_USERNAME}
+DB_PASSWORD={DB_PASSWORD}
 ```
-For the GEMINI_APP_KEY, please contact us at jsunwoo0977@gmail.com to request the appropriate key. Alternatively, if you already possess a Gemini API key, you can input it directly in the .env file.
-
-Make sure that your .env file is correctly updated before proceeding with the setup.
 
 ### build
 
@@ -37,8 +41,8 @@ Make sure that your .env file is correctly updated before proceeding with the se
 
 ## [Optional] Docker-compose for mysql
 
-✅ check environment at docker-compose.yml
-✅ check if your local port is occupied
+- ✅ check environment at docker-compose.yml
+- ✅ check if your local port is occupied
 
 ```shell
 cd docker
@@ -53,9 +57,26 @@ docker-compose up -d
 
 ### Swagger
 
-http://localhost:15000/api/swagger-ui/index.html
-### Health Check 
-http://localhost:15000/api/actuator/health
+- [local] http://localhost:15000/api/swagger-ui/index.html
+- [production] https://eco-picker.com/api/swagger-ui/index.html
+
+### Health Check
+
+- [local] http://localhost:15000/api/actuator/health
+- [production] https://eco-picker.com/api/actuator/health
+
+## Flowcharts
+
+### Infrastructure Architecture
+
+> The following diagram illustrates the infrastructure setup for the application, including the integration with
+> Cloudflare, GCP, AWS, and external APIs:
+
+![Infrastructure Architecture](src/main/resources/static/infra-architecture.png)
+
+### CI/CD Architecture
+
+![CI/CD Architecture](src/main/resources/static/cicd.png)
 
 ## License
 
